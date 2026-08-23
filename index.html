@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animations de physique-chimie</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #1b3a5c;
+    -webkit-text-size-adjust: 100%;
+  }
+  header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 30px;
+    margin: 0 0 8px;
+  }
+  p.subtitle {
+    color: #555;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  a.card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 2px solid #1b3a5c;
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  a.card:hover {
+    background: #eaf4ff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.14);
+  }
+  a.card:active {
+    transform: translateY(0);
+  }
+  .card h2 {
+    font-size: 19px;
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .card p {
+    font-size: 14px;
+    color: #555;
+    margin: 0 0 16px;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  .dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .tag {
+    font-size: 12px;
+    color: #1b3a5c;
+    background: #dceaf7;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+  footer {
+    max-width: 900px;
+    margin: 40px auto 0;
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+  }
+
+  @media (max-width: 480px) {
+    body {
+      padding: 24px 12px 48px;
+    }
+    h1 {
+      font-size: 23px;
+    }
+    p.subtitle {
+      font-size: 14px;
+    }
+    main {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Animations de physique-chimie</h1>
+  <p class="subtitle">Simulations interactives à explorer directement dans le navigateur</p>
+</header>
+
+<main>
+
+  <!--
+    Pour ajouter une ressource :
+    1. Créer un dossier à la racine (nom en minuscules, sans espace ni apostrophe)
+       ex. : changement-detat/
+    2. Y placer un fichier index.html
+    3. Copier le bloc <a class="card"> ci-dessous et adapter href, titre et description
+  -->
+
+  <a class="card" href="composition-de-lair/">
+    <h2>La composition de l'air</h2>
+    <p>L'air est un mélange de plusieurs espèces chimiques. Observer les proportions de diazote, de dioxygène et des autres gaz, et faire varier la température.</p>
+    <div class="dots">
+      <span class="dot" style="background:#3b82f6;"></span>
+      <span class="dot" style="background:#ef4444;"></span>
+      <span class="dot" style="background:#22c55e;"></span>
+      <span class="tag">Chimie</span>
+    </div>
+  </a>
+
+</main>
+
+<footer>
+  Ressources pédagogiques &middot; ouvrables sur ordinateur, tablette et téléphone
+</footer>
+
+</body>
+</html>

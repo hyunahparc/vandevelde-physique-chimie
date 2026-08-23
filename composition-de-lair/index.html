@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Composition de l'air - Animation</title>
+<style>
+  html, body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    overflow-y: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  h1 {
+    color: #1b3a5c;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  p.subtitle {
+    color: #555;
+    margin-top: 0;
+    text-align: center;
+  }
+  #container {
+    position: relative;
+    width: 700px;
+    max-width: 95vw;
+    height: 450px;
+    max-height: 60vh;
+    background: #eaf4ff;
+    border: 3px solid #1b3a5c;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #legend {
+    display: flex;
+    gap: 25px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  #controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #1b3a5c;
+    color: white;
+    cursor: pointer;
+    min-height: 44px;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  button:hover {
+    background: #2c557f;
+  }
+  button:active {
+    background: #14304b;
+    transform: scale(0.97);
+  }
+  #speedRange {
+    width: 150px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  #modelControls {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .modeBtn {
+    background: white;
+    color: #1b3a5c;
+    border: 2px solid #1b3a5c;
+    min-height: 44px;
+  }
+  .modeBtn:hover {
+    background: #dceaf7;
+  }
+  .modeBtn:active {
+    background: #c5ddf2;
+    transform: scale(0.97);
+  }
+  .modeBtn.active {
+    background: #1b3a5c;
+    color: white;
+  }
+  #counter {
+    margin-top: 10px;
+    font-size: 15px;
+    color: #333;
+    text-align: center;
+  }
+
+  /* Portrait sur mobile : compacter pour tenir dans les embeds à hauteur limitée (ex. Google Sites) */
+  @media (max-width: 480px) and (orientation: portrait) {
+    body {
+      padding: 8px;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+    p.subtitle {
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    #container {
+      height: 42vh;
+      max-height: 42vh;
+    }
+    #legend {
+      margin-top: 8px;
+      gap: 8px;
+    }
+    .legend-item {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+    #controls {
+      margin-top: 8px;
+      gap: 8px;
+    }
+    #controls label {
+      font-size: 13px;
+    }
+    #speedRange {
+      width: 110px;
+    }
+    #modelControls {
+      margin-top: 8px;
+      gap: 6px;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 12px;
+      min-height: 38px;
+    }
+    #counter {
+      font-size: 11px;
+      margin-top: 6px;
+    }
+  }
+
+  /* Format paysage sur petit écran (téléphone à l'horizontale) */
+  @media (max-height: 500px) and (orientation: landscape) {
+    body {
+      padding: 8px;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+    p.subtitle {
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    #container {
+      height: 40vh;
+      max-height: 40vh;
+    }
+    #legend {
+      margin-top: 8px;
+      gap: 10px;
+    }
+    .legend-item {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+    #controls, #modelControls {
+      margin-top: 8px;
+      gap: 8px;
+    }
+    button {
+      padding: 8px 14px;
+      font-size: 13px;
+      min-height: 38px;
+    }
+    #counter {
+      font-size: 12px;
+      margin-top: 6px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>La composition de l'air</h1>
+<p class="subtitle">L'air est un mélange de plusieurs espèces chimiques (gaz)</p>
+
+<div id="container">
+  <canvas id="canvas"></canvas>
+</div>
+
+<div id="legend">
+  <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span>Diazote N&#8322;</div>
+  <div class="legend-item"><span class="dot" style="background:#ef4444;"></span>Dioxygène O&#8322;</div>
+  <div class="legend-item"><span class="dot" style="background:#22c55e;"></span>Autres gaz : CO&#8322;, Ar...</div>
+</div>
+
+<div id="controls">
+  <button id="toggleBtn">Pause</button>
+  <label for="speedRange">Température :</label>
+  <input type="range" id="speedRange" min="0.2" max="3" step="0.1" value="1">
+  <span id="tempLabel">20 °C</span>
+</div>
+
+<div id="modelControls">
+  <button id="btn100" class="modeBtn">100 molécules</button>
+  <button id="btn200" class="modeBtn active">200 molécules</button>
+  <button id="btnDetail" class="modeBtn">Modèle détaillé (2 boules/molécule)</button>
+</div>
+
+<div id="counter"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Proportions réalistes de l'air (fixes ; le nombre total de molécules, lui, est réglable)
+const PROP_N2 = 0.78;
+const PROP_O2 = 0.21;
+// le reste (~0.01) correspond aux "autres gaz"
+
+const colors = {
+  N2: '#3b82f6',
+  O2: '#ef4444',
+  other: '#22c55e'
+};
+
+const radii = {
+  N2: 6,
+  O2: 6.5,
+  other: 5
+};
+
+let totalParticles = 200;
+let n2Count = 0, o2Count = 0, otherCount = 0;
+let detailedModel = false; // false = 1 boule/molécule, true = 2 boules/molécule (diatomique)
+let particles = [];
+
+function computeCounts(total) {
+  const n2 = Math.round(total * PROP_N2);
+  const o2 = Math.round(total * PROP_O2);
+  const other = total - n2 - o2;
+  return { n2, o2, other };
+}
+
+function createParticles() {
+  particles = [];
+  const counts = computeCounts(totalParticles);
+  n2Count = counts.n2;
+  o2Count = counts.o2;
+  otherCount = counts.other;
+
+  function addMolecule(type) {
+    const r = radii[type];
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    const vx = (Math.random() - 0.5) * 2;
+    const vy = (Math.random() - 0.5) * 2;
+    const angle = Math.random() * Math.PI * 2;
+    particles.push({
+      type: type,
+      x: x,
+      y: y,
+      vx: vx,
+      vy: vy,
+      r: r,
+      angle: angle,
+      spin: (Math.random() - 0.5) * 0.06
+    });
+  }
+
+  function addParticles(type, count) {
+    for (let i = 0; i < count; i++) {
+      addMolecule(type);
+    }
+  }
+  addParticles('N2', n2Count);
+  addParticles('O2', o2Count);
+  addParticles('other', otherCount);
+}
+createParticles();
+
+function updateCounter() {
+  const modelText = detailedModel ? ' (modèle détaillé : 2 boules/molécule)' : '';
+  document.getElementById('counter').textContent =
+    `N\u2082 : ${n2Count} molécules  |  O\u2082 : ${o2Count} molécules  |  Autres : ${otherCount} molécules  (total simulé : ${totalParticles})${modelText}`;
+}
+updateCounter();
+
+function setActiveModeBtn(id) {
+  document.querySelectorAll('.modeBtn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(id);
+  if (btn) btn.classList.add('active');
+}
+
+document.getElementById('btn100').addEventListener('click', function() {
+  totalParticles = 100;
+  createParticles();
+  updateCounter();
+  setActiveModeBtn('btn100');
+});
+
+document.getElementById('btn200').addEventListener('click', function() {
+  totalParticles = 200;
+  createParticles();
+  updateCounter();
+  setActiveModeBtn('btn200');
+});
+
+document.getElementById('btnDetail').addEventListener('click', function() {
+  detailedModel = !detailedModel;
+  this.textContent = detailedModel
+    ? 'Modèle simple (1 boule/molécule)'
+    : 'Modèle détaillé (2 boules/molécule)';
+  updateCounter();
+});
+
+let running = true;
+let speed = 1;
+
+document.getElementById('toggleBtn').addEventListener('click', function() {
+  running = !running;
+  this.textContent = running ? 'Pause' : 'Reprendre';
+});
+
+const tempLabel = document.getElementById('tempLabel');
+
+function updateTempDisplay(sliderValue) {
+  // Convertit la position du curseur (0.2 à 3) en une température indicative (-20°C à 120°C)
+  const minSlider = 0.2, maxSlider = 3;
+  const minTemp = -20, maxTemp = 120;
+  const temp = minTemp + (sliderValue - minSlider) * (maxTemp - minTemp) / (maxSlider - minSlider);
+  tempLabel.textContent = Math.round(temp) + ' °C';
+}
+
+document.getElementById('speedRange').addEventListener('input', function() {
+  speed = parseFloat(this.value);
+  updateTempDisplay(speed);
+});
+
+updateTempDisplay(speed);
+
+function update() {
+  for (let p of particles) {
+    p.x += p.vx * speed;
+    p.y += p.vy * speed;
+    p.angle += p.spin * speed;
+
+    if (p.x - p.r < 0) { p.x = p.r; p.vx *= -1; }
+    if (p.x + p.r > canvas.width) { p.x = canvas.width - p.r; p.vx *= -1; }
+    if (p.y - p.r < 0) { p.y = p.r; p.vy *= -1; }
+    if (p.y + p.r > canvas.height) { p.y = canvas.height - p.r; p.vy *= -1; }
+  }
+}
+
+function drawAtom(x, y, r, color) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let p of particles) {
+    if (!detailedModel) {
+      // Modèle simple : une boule représente la molécule
+      drawAtom(p.x, p.y, p.r, colors[p.type]);
+    } else if (p.type === 'other') {
+      // "Autres gaz" : on garde une représentation simple (mélange d'Ar, CO2...)
+      drawAtom(p.x, p.y, p.r, colors[p.type]);
+    } else {
+      // Modèle détaillé : molécule diatomique = 2 boules reliées par un trait
+      const atomR = p.r * 0.65;
+      const dist = p.r * 1.1;
+      const dx = Math.cos(p.angle) * dist;
+      const dy = Math.sin(p.angle) * dist;
+      const x1 = p.x - dx, y1 = p.y - dy;
+      const x2 = p.x + dx, y2 = p.y + dy;
+
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      drawAtom(x1, y1, atomR, colors[p.type]);
+      drawAtom(x2, y2, atomR, colors[p.type]);
+    }
+  }
+}
+
+function loop() {
+  if (running) {
+    update();
+    draw();
+  }
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+</body>
+</html>
