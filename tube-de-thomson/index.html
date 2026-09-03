@@ -15,7 +15,7 @@
     --laiton-sombre: #6b4c26;
     --verre: #b9cbc8;
     --vert: #4bff3a;
-    --braise: #ff6a3d;
+    --decharge: #9b8cff;
     --charge-pos: #ff5a4d;
     --charge-neg: #4da6ff;
     --parchemin: #ede3d0;
@@ -58,6 +58,11 @@
     font-size: clamp(1.05rem, 2.6vw, 1.6rem); letter-spacing:.02em; color: var(--laiton-clair);
     text-shadow: 0 1px 0 rgba(0,0,0,.5);
   }
+  .placard h1 .flag{
+    display:inline-block; font-style:normal;
+    font-size:.62em; margin-left:.4em; vertical-align:.1em;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.5));
+  }
   .placard .sub{
     margin:3px 0 0; font-family:'IBM Plex Mono', monospace; font-size: clamp(.62rem, 1.4vw, .74rem);
     letter-spacing:.06em; color: rgba(237,227,208,.65); text-transform:uppercase;
@@ -82,12 +87,12 @@
   .tube-tag{
     pointer-events:none;
     position:fixed; left:0; top:0;
-    transform: translate(-50%, -128%);
+    transform: translate(-50%, -50%);
     display:flex; align-items:center; gap:7px;
     background: rgba(21,15,11,.85);
     border:1px solid rgba(231,196,134,.28);
-    border-radius:999px;
-    padding: 6px 13px 6px 9px;
+    border-radius:7px;
+    padding: 6px 12px 6px 9px;
     font-family:'IBM Plex Mono', monospace; font-size:.66rem; letter-spacing:.02em;
     color: rgba(237,227,208,.92);
     white-space:nowrap;
@@ -97,16 +102,21 @@
     z-index:5;
   }
   .tube-tag.visible{ opacity:1; }
-  .tube-tag::after{
-    content:''; position:absolute; left:50%; bottom:-4px;
-    width:8px; height:8px;
-    background: rgba(21,15,11,.85);
-    border-right:1px solid rgba(231,196,134,.28); border-bottom:1px solid rgba(231,196,134,.28);
-    transform: translateX(-50%) rotate(45deg);
+
+  #tagLines{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:4;
   }
+  .tag-line{ stroke-width:1.3; opacity:0; transition:opacity .2s ease; }
+  .tag-line.visible{ opacity:.65; }
+  #lineCathode{ stroke: var(--decharge); }
+  #lineAnode{ stroke:#cfd3d6; }
+  #linePlates{ stroke:#cfd3d6; }
+  #lineScreen{ stroke:#2fd94b; }
   .legend-item{ display:flex; align-items:center; gap:7px; color: rgba(237,227,208,.85); white-space:nowrap; }
   .dot{ width:8px; height:8px; border-radius:50%; flex:none; box-shadow:0 0 5px currentColor; }
-  .dot-cathode{ background:var(--braise); color:var(--braise); }
+  .dot-cathode{ background:var(--decharge); color:var(--decharge); }
   .dot-anode{ background:#cfd3d6; color:#cfd3d6; }
   .dot-plates{ background:#cfd3d6; color:#cfd3d6; }
   .dot-beam{ background:var(--vert); color:var(--vert); }
@@ -240,11 +250,73 @@
   }
   .conclusion-close:hover{ background: rgba(169,121,59,.35); }
 
+  /* ---------------------------------------------------------------------
+     SIÈSTE — écran qui s'assombrit, lune, Zzz, puis screamer
+  --------------------------------------------------------------------- */
+  .sieste-overlay{
+    position:fixed; inset:0; z-index:55;
+    background:#000; opacity:0;
+    pointer-events:none;
+    transition: opacity 1.5s ease;
+  }
+  .sieste-overlay.active{ opacity:.72; }
+
+  .sieste-moon{
+    position:fixed; left:50%; top:-18vh;
+    transform: translateX(-50%);
+    width: clamp(60px, 9vw, 104px); height: clamp(60px, 9vw, 104px);
+    border-radius:50%;
+    background: radial-gradient(circle at 34% 30%, #fffaea 0%, #f2e6b8 45%, #d8c584 78%, #b9a866 100%);
+    box-shadow: 0 0 34px rgba(242,230,184,.55), 0 0 80px rgba(242,230,184,.22), inset -16px -12px 0 rgba(0,0,0,.14);
+    opacity:0;
+    transition: top 1.8s cubic-bezier(.22,.61,.36,1), opacity .6s ease;
+    z-index:56; pointer-events:none;
+  }
+  .sieste-moon.active{ top:9%; opacity:1; }
+  .sieste-moon.hide{ top:-18vh; opacity:0; transition: top .6s ease-in, opacity .5s ease; }
+
+  .sieste-zs{
+    position:fixed; left:50%; top:26%;
+    width:140px; height:140px; margin-left:-70px;
+    z-index:56; pointer-events:none;
+    opacity:0; transition:opacity .4s ease;
+    font-family:'Playfair Display', serif; font-style:italic; font-weight:700;
+    font-size:1.6rem;
+    color: rgba(237,227,208,.92);
+  }
+  .sieste-zs.active{ opacity:1; }
+  .sieste-zs span{
+    position:absolute; bottom:0; opacity:0;
+    text-shadow: 0 0 10px rgba(237,227,208,.5);
+    animation: zzz-rise 2.3s ease-in-out infinite;
+  }
+  @keyframes zzz-rise{
+    0%{ opacity:0; transform: translate(0,0) scale(.7); }
+    12%{ opacity:.95; }
+    75%{ opacity:.2; }
+    100%{ opacity:0; transform: translate(10px,-92px) scale(1.3); }
+  }
+
+  .screamer-overlay{
+    position:fixed; inset:0; z-index:75;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle, #f4f0e8 0%, #d8d0c0 100%);
+    opacity:0; pointer-events:none;
+  }
+  .screamer-overlay.flash{ opacity:1; }
+  .screamer-ghost{
+    font-size: min(58vh, 58vw);
+    line-height:1;
+    transform: scale(.85);
+  }
+  .screamer-overlay.flash .screamer-ghost{ transform: scale(1.05); }
+
   @media (max-width: 640px){
     .legend{ top:90px; left:12px; right:auto; bottom:auto; max-width: calc(100vw - 24px); font-size:.62rem; }
     .placard{ max-width: 62vw; padding: 8px 12px 10px; }
-    .buttons-row{ gap:6px; }
-    .switch{ font-size:.66rem; padding:9px 10px; min-height:38px; }
+    .control-plaque{ padding: 10px 12px 12px; }
+    .buttons-row{ gap:5px; }
+    .switch{ font-size:.58rem; padding:6px 8px; min-height:29px; letter-spacing:.01em; }
     #camReset{ margin-top: 0; top: auto; bottom: 190px; }
     .conclusion-card{ padding: 20px 18px 18px; }
     .hint{ display:none; }
@@ -259,8 +331,8 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <header class="placard">
         <a class="back-link" href="../premiere/">&larr; Retour aux animations de Première</a>
-        <h1>Le tube de Thomson</h1>
-        <p class="sub">Cambridge · 1897 — la découverte de l'électron</p>
+        <h1>Le tube de Thomson <span class="flag" title="Royaume-Uni" aria-label="Royaume-Uni">🇬🇧</span></h1>
+        <p class="sub">1897 — la découverte de l'électron</p>
       </header>
     </div>
 
@@ -274,6 +346,7 @@
         <button id="btnInvert" class="switch" disabled>⇄ Inverser la polarité</button>
         <button id="btnLegend" class="switch">▤ Afficher la légende</button>
         <button id="btnConclusion" class="switch">❖ Conclusion</button>
+        <button id="btnSieste" class="switch">💤 Sièste</button>
       </div>
     </div>
   </div>
@@ -282,10 +355,25 @@
     <div class="legend-item"><span class="dot dot-beam"></span>Faisceau d'électrons</div>
   </div>
 
-  <div class="tube-tag" id="tagCathode"><span class="dot dot-cathode"></span>Cathode (émet les électrons)</div>
+  <svg id="tagLines">
+    <line id="lineCathode" class="tag-line"></line>
+    <line id="lineAnode" class="tag-line"></line>
+    <line id="linePlates" class="tag-line"></line>
+    <line id="lineScreen" class="tag-line"></line>
+  </svg>
+  <div class="tube-tag" id="tagCathode"><span class="dot dot-cathode"></span>Cathode (libère les électrons)</div>
   <div class="tube-tag" id="tagAnode"><span class="dot dot-anode"></span>Anode (accélère le faisceau)</div>
   <div class="tube-tag" id="tagPlates"><span class="dot dot-plates"></span>Plaques de déviation</div>
   <div class="tube-tag" id="tagScreen"><span class="dot dot-screen"></span>Écran fluorescent</div>
+
+  <div class="sieste-overlay" id="siesteOverlay"></div>
+  <div class="sieste-moon" id="siesteMoon"></div>
+  <div class="sieste-zs" id="siesteZs">
+    <span style="left:-14px; animation-delay:0s;">Z</span>
+    <span style="left:10px; animation-delay:.6s; font-size:.75em;">z</span>
+    <span style="left:30px; animation-delay:1.2s; font-size:.6em;">z</span>
+  </div>
+  <div class="screamer-overlay" id="screamerOverlay"><div class="screamer-ghost">👻</div></div>
 
   <button id="camReset" title="Réinitialiser la vue">⟲</button>
   <div class="hint" id="hint">glisser pour tourner · pincer ou molette pour zoomer</div>
@@ -296,9 +384,9 @@
       <p class="conclusion-title">Conclusion de l'expérience</p>
       <h2 class="conclusion-heading">Une particule à l'intérieur de l'atome</h2>
       <p class="conclusion-text">
-        Le faisceau se courbe sous l'effet du champ électrique : ce n'est donc pas un rayonnement, mais un flux de particules chargées <strong>négativement</strong>, arrachées aux atomes de la cathode. Quelle que soit la cathode utilisée, ces particules sont toujours identiques et environ <strong>2000 fois plus légères</strong> que l'atome d'hydrogène — le plus léger des atomes connus.
+        Le faisceau se courbe sous l'effet du champ électrique : c'est donc un flux de particules chargées <strong>négativement</strong>, arrachées aux atomes de la cathode. Quelle que soit la cathode utilisée, ces particules sont toujours identiques et environ <strong>2000 fois plus légères</strong> que l'atome d'hydrogène — le plus léger des atomes connus.
         <br><br>
-        Thomson en conclut que l'atome, longtemps cru indivisible, contient un constituant plus petit que lui : il vient de découvrir la première particule subatomique, <strong>l'électron</strong>.
+        Avant cette expérience, on pensait l'atome indivisible : une sphère pleine, neutre et sans structure interne. Thomson montre qu'il contient en réalité un constituant plus petit et chargé que lui : il vient de découvrir la première particule subatomique, <strong>l'électron</strong>.
       </p>
     </div>
   </div>
@@ -311,7 +399,6 @@
   /* ---------------------------------------------------------------------
      CONSTANTES GÉOMÉTRIQUES
   --------------------------------------------------------------------- */
-  const TUBE_RADIUS   = 1.5;
   const TUBE_X0       = -5.5, TUBE_X1 = 5.5;
   const CATHODE_X     = -5.2;
   const ANODE_X       = -3.6;
@@ -321,6 +408,33 @@
   const PLATE_X0      = -1.3, PLATE_X1 = 1.3;
   const PLATE_Y       = 0.85;
   const MAX_DEFL      = 0.30;
+
+  // Le vrai tube de Thomson n'était pas un simple cylindre : un bulbe côté
+  // cathode, resserré au niveau de l'anode, puis un second bulbe côté écran.
+  // Profil simplifié (position sur l'axe -> rayon du verre) utilisé à la
+  // fois pour la géométrie du tube et pour caler les cerclages / bouchons.
+  const TUBE_PROFILE = [
+    [TUBE_X0,  1.55],
+    [-4.9,     1.75],
+    [-4.2,     1.7 ],
+    [ANODE_X,  1.45],
+    [-2.4,     1.45],
+    [0,        1.45],
+    [2.0,      1.55],
+    [3.4,      1.75],
+    [4.6,      1.9 ],
+    [TUBE_X1,  1.9 ]
+  ];
+  function tubeRadiusAt(x){
+    for(let i=0;i<TUBE_PROFILE.length-1;i++){
+      const [x0,r0] = TUBE_PROFILE[i], [x1,r1] = TUBE_PROFILE[i+1];
+      if(x>=x0 && x<=x1){
+        const t = (x-x0)/(x1-x0);
+        return r0 + (r1-r0)*t;
+      }
+    }
+    return TUBE_PROFILE[TUBE_PROFILE.length-1][1];
+  }
   const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------------------------------------------------------------------
@@ -339,7 +453,7 @@
     progress: 0, progressTarget: 0,       // 0..1 : portion du tube parcourue par le faisceau
     defl: 0, deflTarget: 0,                // déviation verticale courante en unités monde
     plateGlow: 0, plateGlowTarget: 0,      // 0..1 : intensité visuelle des plaques/charges
-    heater: 0, heaterTarget: 0             // 0..1 : incandescence de la cathode
+    spark: 0, sparkTarget: 0                // 0..1 : intensité de la décharge (ionisation) à la cathode
   };
 
   /* ---------------------------------------------------------------------
@@ -505,13 +619,14 @@
   const tubeGroup = new THREE.Group();
   scene.add(tubeGroup);
 
-  const cylGeo = new THREE.CylinderGeometry(TUBE_RADIUS, TUBE_RADIUS, TUBE_X1-TUBE_X0, 48, 1, true);
-  const cylMesh = new THREE.Mesh(cylGeo, glassMat);
-  cylMesh.rotation.z = Math.PI/2;
-  tubeGroup.add(cylMesh);
+  const lathePts = TUBE_PROFILE.map(([x,r]) => new THREE.Vector2(r, x));
+  const latheGeo = new THREE.LatheGeometry(lathePts, 48);
+  const latheMesh = new THREE.Mesh(latheGeo, glassMat);
+  latheMesh.rotation.z = -Math.PI/2;
+  tubeGroup.add(latheMesh);
 
   function makeCap(x){
-    const capGeo = new THREE.CircleGeometry(TUBE_RADIUS, 48);
+    const capGeo = new THREE.CircleGeometry(tubeRadiusAt(x), 48);
     const cap = new THREE.Mesh(capGeo, glassMat);
     cap.rotation.y = Math.PI/2;
     cap.position.x = x;
@@ -522,7 +637,7 @@
 
   // fine ligne de renfort (cerclages) pour lire la rondeur du verre
   for(const gx of [TUBE_X0+0.4, TUBE_X1-0.4]){
-    const ringGeo = new THREE.TorusGeometry(TUBE_RADIUS, 0.012, 8, 48);
+    const ringGeo = new THREE.TorusGeometry(tubeRadiusAt(gx), 0.012, 8, 48);
     const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0xdfeae8, transparent:true, opacity:0.18}));
     ring.rotation.y = Math.PI/2;
     ring.position.x = gx;
@@ -540,25 +655,36 @@
   cathodeMesh.rotation.y = Math.PI/2;
   cathodeMesh.position.x = CATHODE_X;
   scene.add(cathodeMesh);
-  const cathodeLight = new THREE.PointLight(0xff6a3d, 0, 4, 2);
+  const cathodeLight = new THREE.PointLight(0x9b8cff, 0, 4, 2);
   cathodeLight.position.set(CATHODE_X+0.2, 0, 0);
   scene.add(cathodeLight);
 
   /* ---------------------------------------------------------------------
-     ANODE (anneau métallique)
+     ANODE — dans le vrai tube, ce n'est pas un simple anneau plat : c'est un
+     petit tube métallique percé d'une ouverture étroite qui collimate le
+     faisceau en un pinceau fin avant qu'il n'atteigne les plaques.
   --------------------------------------------------------------------- */
-  const anodeGeo = new THREE.RingGeometry(0.35, 1.05, 40, 1);
+  const ANODE_APERTURE = 0.14;
+  const anodeGroup = new THREE.Group();
+  anodeGroup.position.x = ANODE_X;
+  scene.add(anodeGroup);
+
+  const anodeGeo = new THREE.RingGeometry(ANODE_APERTURE, 1.2, 40, 1);
   const anodeMesh = new THREE.Mesh(anodeGeo, metalMat);
   anodeMesh.rotation.y = Math.PI/2;
-  anodeMesh.position.x = ANODE_X;
-  scene.add(anodeMesh);
+  anodeGroup.add(anodeMesh);
 
-  const anodeGlowGeo = new THREE.RingGeometry(0.36, 0.5, 32, 1);
+  // Collerette qui prolonge l'ouverture en un petit tube (le "collimateur")
+  const anodeCollarGeo = new THREE.CylinderGeometry(ANODE_APERTURE, ANODE_APERTURE, 0.55, 28, 1, true);
+  const anodeCollar = new THREE.Mesh(anodeCollarGeo, metalMat);
+  anodeCollar.rotation.z = Math.PI/2;
+  anodeGroup.add(anodeCollar);
+
+  const anodeGlowGeo = new THREE.RingGeometry(ANODE_APERTURE+0.01, ANODE_APERTURE+0.16, 32, 1);
   const anodeGlowMat = new THREE.MeshBasicMaterial({ color:0xbfe8ff, transparent:true, opacity:0, blending:THREE.AdditiveBlending, side:THREE.DoubleSide, depthWrite:false });
   const anodeGlow = new THREE.Mesh(anodeGlowGeo, anodeGlowMat);
   anodeGlow.rotation.y = Math.PI/2;
-  anodeGlow.position.x = ANODE_X;
-  scene.add(anodeGlow);
+  anodeGroup.add(anodeGlow);
 
   /* ---------------------------------------------------------------------
      ÉCRAN FLUORESCENT + POINT D'IMPACT
@@ -569,6 +695,34 @@
   screenMesh.rotation.y = Math.PI/2;
   screenMesh.position.x = SCREEN_X;
   scene.add(screenMesh);
+
+  // Échelle graduée collée sur l'écran : c'est avec ce type de repère que
+  // Thomson lisait la déviation du faisceau. Ici purement indicative,
+  // sans lecture chiffrée — le propos reste qualitatif.
+  function makeScaleTexture(){
+    const size = 512;
+    const cnv = document.createElement('canvas'); cnv.width = size; cnv.height = size;
+    const ctx = cnv.getContext('2d');
+    ctx.strokeStyle = 'rgba(237,227,208,0.4)';
+    ctx.lineWidth = 1;
+    const step = size/12;
+    for(let i=1;i<12;i++){
+      ctx.beginPath(); ctx.moveTo(i*step,0); ctx.lineTo(i*step,size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i*step); ctx.lineTo(size,i*step); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(237,227,208,0.7)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(size/2,0); ctx.lineTo(size/2,size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,size/2); ctx.lineTo(size,size/2); ctx.stroke();
+    return new THREE.CanvasTexture(cnv);
+  }
+  const scaleMat = new THREE.MeshBasicMaterial({
+    map: makeScaleTexture(), transparent:true, opacity:0.55, side:THREE.DoubleSide, depthWrite:false
+  });
+  const scaleMesh = new THREE.Mesh(new THREE.CircleGeometry(1.32, 48), scaleMat);
+  scaleMesh.rotation.y = Math.PI/2;
+  scaleMesh.position.x = SCREEN_X - 0.025;
+  scene.add(scaleMesh);
 
   function makeGlowTexture(colorHex){
     const size = 128;
@@ -724,12 +878,11 @@
     if(!state.powerOn){
       txt = "Dispositif éteint. Aucun faisceau ne circule dans le tube.";
     } else if(!state.platesVisible){
-      txt = "La cathode chauffée émet des électrons : un faisceau rectiligne, rendu visible en vert fluorescent, traverse le tube jusqu'à l'écran.";
+      txt = "Sous très haute tension, le gaz résiduel s'ionise et arrache des électrons à la cathode : un faisceau rectiligne, rendu visible en vert fluorescent, traverse le tube jusqu'à l'écran.";
     } else if(!state.voltageOn){
       txt = "Les plaques de déviation sont en place, mais aucune tension n'est appliquée : le faisceau reste parfaitement rectiligne.";
     } else {
-      const posSide = state.polarity === 1 ? "supérieure" : "inférieure";
-      txt = "Tension appliquée : les électrons, chargés négativement, sont attirés par la plaque " + posSide + " (chargée positivement) — le faisceau se courbe vers elle.";
+      txt = "Flux vert = particules arrachées aux atomes de la cathode.";
     }
     captionEl.textContent = txt;
   }
@@ -749,59 +902,80 @@
   const conclusionOverlay = document.getElementById('conclusionOverlay');
   const btnCloseConclusion = document.getElementById('btnCloseConclusion');
 
-  /* Étiquettes flottantes pointant vers les objets du tube */
+  /* Étiquettes flottantes pointant vers les objets du tube, reliées par un
+     trait plutôt que par une pointe de bulle (qui ne suivait pas toujours
+     l'objet une fois l'étiquette recalée pour rester dans l'écran). */
   const tubeTags = {
     cathode: document.getElementById('tagCathode'),
     anode:   document.getElementById('tagAnode'),
     plates:  document.getElementById('tagPlates'),
     screen:  document.getElementById('tagScreen')
   };
-  const tagAnchors = {
-    cathode: new THREE.Vector3(CATHODE_X, 1.05, 0),
-    anode:   new THREE.Vector3(ANODE_X, 2.05, 0),
-    plates:  new THREE.Vector3(0, PLATE_Y + 0.55, 0),
-    screen:  new THREE.Vector3(SCREEN_X, 1.65, 0)
+  const tubeTagLines = {
+    cathode: document.getElementById('lineCathode'),
+    anode:   document.getElementById('lineAnode'),
+    plates:  document.getElementById('linePlates'),
+    screen:  document.getElementById('lineScreen')
   };
-  function updateTagPos(el, worldPos){
+  const tagAnchors = {
+    cathode: new THREE.Vector3(CATHODE_X, tubeRadiusAt(CATHODE_X) + 0.3, 0),
+    anode:   new THREE.Vector3(ANODE_X, tubeRadiusAt(ANODE_X) + 0.3, 0),
+    plates:  new THREE.Vector3(0, PLATE_Y + 0.55, 0),
+    screen:  new THREE.Vector3(SCREEN_X, tubeRadiusAt(SCREEN_X) + 0.3, 0)
+  };
+  function hideTag(el, lineEl){
+    el.classList.remove('visible');
+    lineEl.classList.remove('visible');
+  }
+  function updateTagPos(el, lineEl, worldPos){
     const v = worldPos.clone().project(camera);
     const rect = dom.getBoundingClientRect();
     const w = rect.width, h = rect.height;
     const x = (v.x*0.5+0.5)*w;
     const y = (-v.y*0.5+0.5)*h;
     const inFront = v.z < 1 && x>4 && x<w-4 && y>4 && y<h-4;
-    if(!inFront){ el.classList.remove('visible'); return; }
+    if(!inFront){ hideTag(el, lineEl); return; }
     const elW = el.offsetWidth || 150, elH = el.offsetHeight || 26;
+    // La boîte reste posée un peu au-dessus du point réel, recalée pour
+    // tenir dans l'écran — mais le trait, lui, vise toujours ce point exact.
     const xC = Math.max(elW/2+6, Math.min(w-elW/2-6, x));
-    const yC = Math.max(elH*1.28+6, Math.min(h-6, y));
+    const yC = Math.max(elH/2+6, Math.min(h-elH/2-6, y-38));
     el.style.left = xC+'px'; el.style.top = yC+'px';
     el.classList.add('visible');
+
+    const halfW = elW/2, halfH = elH/2;
+    const lx = Math.max(xC-halfW, Math.min(xC+halfW, x));
+    const ly = Math.max(yC-halfH, Math.min(yC+halfH, y));
+    lineEl.setAttribute('x1', lx); lineEl.setAttribute('y1', ly);
+    lineEl.setAttribute('x2', x);  lineEl.setAttribute('y2', y);
+    lineEl.classList.add('visible');
   }
   function updateTubeTags(){
     if(!legendVisible){
-      tubeTags.cathode.classList.remove('visible');
-      tubeTags.anode.classList.remove('visible');
-      tubeTags.plates.classList.remove('visible');
-      tubeTags.screen.classList.remove('visible');
+      hideTag(tubeTags.cathode, tubeTagLines.cathode);
+      hideTag(tubeTags.anode, tubeTagLines.anode);
+      hideTag(tubeTags.plates, tubeTagLines.plates);
+      hideTag(tubeTags.screen, tubeTagLines.screen);
       return;
     }
-    updateTagPos(tubeTags.cathode, tagAnchors.cathode);
-    updateTagPos(tubeTags.anode, tagAnchors.anode);
-    updateTagPos(tubeTags.screen, tagAnchors.screen);
-    if(state.platesVisible){ updateTagPos(tubeTags.plates, tagAnchors.plates); }
-    else { tubeTags.plates.classList.remove('visible'); }
+    updateTagPos(tubeTags.cathode, tubeTagLines.cathode, tagAnchors.cathode);
+    updateTagPos(tubeTags.anode, tubeTagLines.anode, tagAnchors.anode);
+    updateTagPos(tubeTags.screen, tubeTagLines.screen, tagAnchors.screen);
+    if(state.platesVisible){ updateTagPos(tubeTags.plates, tubeTagLines.plates, tagAnchors.plates); }
+    else { hideTag(tubeTags.plates, tubeTagLines.plates); }
   }
 
   let legendVisible = false;
   let conclusionVisible = false;
 
   function refreshButtons(){
-    btnPower.textContent   = state.powerOn ? "⏻ Éteindre le dispositif" : "⏻ Allumer le dispositif";
+    btnPower.textContent   = state.powerOn ? "⏻ Éteindre" : "⏻ Allumer";
     btnPower.classList.toggle('on', state.powerOn);
 
-    btnMode.textContent    = state.beamMode === 'line' ? "◐ Afficher en particules" : "◉ Afficher en ligne continue";
+    btnMode.textContent    = state.beamMode === 'line' ? "◐ Particules" : "◉ Rayon";
     btnMode.classList.toggle('on', state.beamMode === 'particles');
 
-    btnPlates.textContent  = state.platesVisible ? "▭ Retirer les plaques" : "▭ Placer les plaques";
+    btnPlates.textContent  = state.platesVisible ? "▭ Retirer plaques" : "▭ Placer plaques";
     btnPlates.classList.toggle('on', state.platesVisible);
 
     btnVoltage.disabled = !state.platesVisible;
@@ -820,7 +994,7 @@
   btnPower.addEventListener('click', () => {
     state.powerOn = !state.powerOn;
     anim.progressTarget = state.powerOn ? 1 : 0;
-    anim.heaterTarget = state.powerOn ? 1 : 0;
+    anim.sparkTarget = state.powerOn ? 1 : 0;
     refreshButtons(); updateCaption();
   });
 
@@ -878,6 +1052,47 @@
   });
 
   /* ---------------------------------------------------------------------
+     SIÈSTE — petite pause animée qui se termine par un screamer
+  --------------------------------------------------------------------- */
+  const btnSieste = document.getElementById('btnSieste');
+  const siesteOverlay = document.getElementById('siesteOverlay');
+  const siesteMoon = document.getElementById('siesteMoon');
+  const siesteZs = document.getElementById('siesteZs');
+  const screamerOverlay = document.getElementById('screamerOverlay');
+  let siestePlaying = false;
+
+  function playSieste(){
+    if(siestePlaying) return;
+    siestePlaying = true;
+    btnSieste.disabled = true;
+    btnSieste.classList.add('on');
+
+    siesteMoon.classList.remove('hide');
+    siesteOverlay.classList.add('active');
+    siesteZs.classList.add('active');
+    requestAnimationFrame(() => siesteMoon.classList.add('active'));
+
+    setTimeout(() => {
+      // Screamer : très bref, sans transition, pour l'effet de surprise
+      screamerOverlay.classList.add('flash');
+      setTimeout(() => {
+        screamerOverlay.classList.remove('flash');
+        siesteMoon.classList.remove('active');
+        siesteMoon.classList.add('hide');
+        siesteZs.classList.remove('active');
+        siesteOverlay.classList.remove('active');
+        setTimeout(() => {
+          siesteMoon.classList.remove('hide');
+          btnSieste.disabled = false;
+          btnSieste.classList.remove('on');
+          siestePlaying = false;
+        }, 700);
+      }, 180);
+    }, 3600);
+  }
+  btnSieste.addEventListener('click', playSieste);
+
+  /* ---------------------------------------------------------------------
      BOUCLE D'ANIMATION
   --------------------------------------------------------------------- */
   const growDur = reducedMotion ? 0.25 : 1.3;
@@ -898,12 +1113,16 @@
     // Déviation (lissage exponentiel)
     anim.defl += (anim.deflTarget - anim.defl) * (1 - Math.exp(-dt*4));
     anim.plateGlow += (anim.plateGlowTarget - anim.plateGlow) * (1 - Math.exp(-dt*4));
-    anim.heater += (anim.heaterTarget - anim.heater) * (1 - Math.exp(-dt*3));
+    anim.spark += (anim.sparkTarget - anim.spark) * (1 - Math.exp(-dt*3));
 
-    // Cathode incandescente
-    cathodeMat.emissive.setHex(0xff6a3d);
-    cathodeMat.emissiveIntensity = anim.heater * 1.1;
-    cathodeLight.intensity = anim.heater * 1.4;
+    // Cathode : pas de filament chauffé — sous très haute tension, le gaz
+    // résiduel s'ionise et les ions viennent arracher des électrons à la
+    // cathode. On rend ça par une décharge froide, légèrement instable,
+    // plutôt que par un métal qui rougit.
+    const sparkFlicker = 0.82 + 0.10*Math.sin(now*0.021) + 0.09*Math.sin(now*0.083+2.1) + 0.07*(Math.random()-0.5);
+    cathodeMat.emissive.setHex(0x9b8cff);
+    cathodeMat.emissiveIntensity = anim.spark * 1.05 * sparkFlicker;
+    cathodeLight.intensity = anim.spark * 1.3 * sparkFlicker;
 
     // Anode : léger halo lorsque le dispositif fonctionne
     anodeGlowMat.opacity = anim.progress * 0.35;

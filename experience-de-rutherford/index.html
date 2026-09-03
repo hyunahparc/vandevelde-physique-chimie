@@ -92,17 +92,26 @@
 .ruth-stats-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;}
 .ruth-stats-legend-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary,#9aa5b1);background:var(--surface-1,#151b26);padding:7px 12px;border-radius:var(--radius,10px);}
 .ruth-stats-legend-item b{color:var(--text-primary,#e7ebf0);font-size:15px;}
+.ruth-dog-canvas{position:absolute;top:0;left:0;z-index:8;pointer-events:none;display:none;background:transparent;}
+.ruth-conclusion{display:flex;flex-direction:column;gap:14px;}
+.ruth-concl-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface-1,#151b26);border:0.5px solid var(--border,rgba(255,255,255,0.12));border-radius:var(--radius,10px);padding:12px 14px;}
+.ruth-concl-icon{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.ruth-concl-item b{color:var(--text-primary,#e7ebf0);font-size:14.5px;display:block;margin-bottom:4px;}
+.ruth-concl-item p{margin:0;color:var(--text-secondary,#9aa5b1);font-size:13.5px;line-height:1.5;}
+.ruth-concl-summary{background:linear-gradient(135deg, rgba(77,148,255,0.14), rgba(226,75,74,0.1));border:0.5px solid var(--border-strong,rgba(255,255,255,0.24));border-radius:var(--radius,10px);padding:14px 16px;color:var(--text-primary,#e7ebf0);font-size:14px;line-height:1.6;}
 </style>
 <div class="ruth-outer" id="ruthOuter">
   <div class="ruth-tabs">
     <button class="ruth-tab-btn active" data-tab="overview" aria-pressed="true">Vue d'ensemble</button>
     <button class="ruth-tab-btn" data-tab="zoom" aria-pressed="false">Zoom sur la feuille d'or</button>
     <button class="ruth-tab-btn" data-tab="stats" aria-pressed="false">Stats des résultats</button>
+    <button class="ruth-tab-btn" data-tab="conclusion" aria-pressed="false">Conclusion</button>
   </div>
 
   <div class="ruth-panel" id="panelOverview">
     <div class="ruth-canvas-wrap" id="wrapOverview">
       <canvas class="ruth-canvas" id="ruthCanvas"></canvas>
+      <canvas class="ruth-canvas ruth-dog-canvas" id="dogCanvas"></canvas>
       <div class="ruth-tag" id="tagGun"><span class="ruth-tag-dot" style="background:#4d94ff;color:#4d94ff;"></span>Canon à particules alpha (α)</div>
       <div class="ruth-tag" id="tagFoil"><span class="ruth-tag-dot" style="background:#d4af37;color:#d4af37;"></span>Feuille d'or — ≈ 0,0004 mm d'épaisseur, soit environ 2000 atomes d'or empilés</div>
       <div class="ruth-tag" id="tagScreen"><span class="ruth-tag-dot" style="background:#6fa8ff;color:#6fa8ff;"></span>Écran de détection (scintillation)</div>
@@ -121,9 +130,10 @@
       <label for="ruthSpeed">Vitesse</label>
       <input type="range" id="ruthSpeed" min="0.3" max="2.5" step="0.1" value="1" style="width:140px;">
       <button id="ruthPause" class="ruth-btn">Pause</button>
-      <button id="gunToggle" class="ruth-btn on">Canon : activé</button>
+      <button id="gunToggle" class="ruth-btn off-state">Allumer le canon</button>
       <button id="tagToggle" class="ruth-btn">Afficher la légende (étiquettes)</button>
       <button id="persistToggle" class="ruth-btn">Persistance des impacts</button>
+      <button id="dogBtn" class="ruth-btn">🐶 Chien</button>
     </div>
   </div>
 
@@ -164,6 +174,35 @@
       <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#f0997b"></span>Déviées : <b id="statSide">0</b></div>
       <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#9fc6ff"></span>Traversées : <b id="statThrough">0</b></div>
       <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#e24b4a"></span>Rétrodiffusées : <b id="statBack">0</b></div>
+    </div>
+  </div>
+
+  <div class="ruth-panel" id="panelConclusion" style="display:none;">
+    <div class="ruth-conclusion">
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(159,198,255,0.16);color:#9fc6ff;">①</span>
+        <div>
+          <b>Presque toutes les particules traversent la feuille sans dévier.</b>
+          <p>L'atome est donc surtout... du vide ! La matière n'est pas pleine comme on le pensait.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(240,153,123,0.16);color:#f0997b;">②</span>
+        <div>
+          <b>Quelques particules sont légèrement déviées.</b>
+          <p>Elles passent près d'une charge positive concentrée quelque part dans l'atome, qui les repousse un peu.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(226,75,74,0.16);color:#e24b4a;">③</span>
+        <div>
+          <b>Une infime partie rebondit complètement en arrière.</b>
+          <p>Cela veut dire qu'elles ont percuté quelque chose de très petit, très dense et chargé positivement : le noyau.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-summary">
+        <b>En résumé :</b> l'atome n'est pas une boule pleine. C'est un tout petit noyau, dense et chargé positivement, entouré d'un immense espace presque vide où se déplacent les électrons. C'est le modèle « planétaire » de Rutherford, qui remplace l'ancien modèle du « pudding » de Thomson.
+      </div>
     </div>
   </div>
 </div>
@@ -376,7 +415,7 @@
 
   /* shared state across both particle scenes */
   var SHARED = {
-    gunEnabled: true,
+    gunEnabled: false,
     stats: { sent:0, through:0, side:0, back:0 }
   };
 
@@ -663,7 +702,7 @@
                 if (SHARED.gunEnabled){ particles[i] = newParticle(Math.random()*40); }
                 continue;
               }
-              p.s += dt*150*speedFactor;
+              p.s += (SHARED.gunEnabled || p.s >= 0) ? dt*150*speedFactor : 0;
               var pos;
               if (p.s < 0){ p.mesh.visible = false; continue; }
               p.mesh.visible = true;
@@ -940,7 +979,7 @@
 
     var TRACK_SPEED = 55;
     var ORBIT_DURATION = 2.6;
-    var ORBIT_ANGLE = 100*Math.PI/180;
+    var ORBIT_ANGLE = 45*Math.PI/180;
     var CAPTION_HOLD = 1.9;
     var CAPTION_FADE = 0.4;
 
@@ -1032,7 +1071,7 @@
       track.camFrom.copy(camera.position);
       track.lookFrom.set(0,0,0);
       var approachDir = camera.position.clone().sub(foilPoint).normalize();
-      track.camTo.copy(foilPoint).addScaledVector(approachDir, 24).add(new THREE.Vector3(0,6,0));
+      track.camTo.copy(foilPoint).addScaledVector(approachDir, 46).add(new THREE.Vector3(0,10,0));
       track.lookTo.copy(foilPoint);
 
       SHARED.stats.sent++;
@@ -1129,7 +1168,7 @@
           track.phase = 'orbiting';
           track.timer = 0;
           track.orbitBaseTheta = Math.atan2(camera.position.x-tp.foilPoint.x, camera.position.z-tp.foilPoint.z);
-          track.orbitRadius = Math.max(14, camera.position.distanceTo(tp.foilPoint));
+          track.orbitRadius = Math.max(46, camera.position.distanceTo(tp.foilPoint)*1.4);
           track.orbitY = camera.position.y;
         }
         return;
@@ -1159,7 +1198,7 @@
         var t2 = Math.min(1, tp.s/tp.dist2);
         var pos2 = tp.foilPoint.clone().addScaledVector(tp.dir2, Math.min(tp.s, tp.dist2));
         tp.mesh.position.copy(pos2);
-        var camOffset = new THREE.Vector3(16,10,16);
+        var camOffset = new THREE.Vector3(28,16,28);
         var desiredCam = pos2.clone().add(camOffset);
         camera.position.lerp(desiredCam, Math.min(1, dt*2.2));
         camera.lookAt(pos2);
@@ -1212,6 +1251,7 @@
             updatePassGlows(dt);
             updateTrackScreen(dt);
             var runNormal = (track.phase!=='orbiting');
+            var trackingActive = (track.phase!=='none');
             if (runNormal){
               if (camState.autorotate && !orbitControlsZ.isDragging() && track.phase==='none'){ camState.theta += dt*0.09; updateCamera(); }
               for (var i=0;i<particles.length;i++){
@@ -1220,13 +1260,15 @@
                   if (SHARED.gunEnabled){ particles[i] = newParticle(Math.random()*40); }
                   continue;
                 }
-                p.s += dt*110*speedFactor;
+                p.s += (SHARED.gunEnabled || p.s >= 0) ? dt*110*speedFactor : 0;
                 if (p.s<0){ p.mesh.visible=false; continue; }
                 p.mesh.visible=true;
+                p.mesh.material.color.setHex(trackingActive ? 0x11141c : ALPHA_COLOR);
+                if (p.mesh.children[0]) p.mesh.children[0].material.opacity = trackingActive ? 0.04 : 0.5;
                 var pos;
                 if (p.s<=p.dist1){ pos=p.start.clone().addScaledVector(p.dir1,p.s); }
                 else if (p.s<=p.dist1+p.dist2){
-                  if (!p.flashed && p.type!=='through'){ spawnFlash(p.flashPos,p.type); p.flashed=true; }
+                  if (!p.flashed && p.type!=='through'){ if (!trackingActive) spawnFlash(p.flashPos,p.type); p.flashed=true; }
                   pos=p.foilPoint.clone().addScaledVector(p.dir2,p.s-p.dist1);
                 } else {
                   counts[p.type]++; SHARED.stats[p.type]++; updateCounters();
@@ -1347,6 +1389,268 @@
     return {draw:draw, resize:resize};
   }
 
+  /* ================= CHIEN (bouton surprise) ================= */
+
+  function createDogAnimator(canvasEl, getWidth){
+    var ctx = canvasEl.getContext('2d');
+    var height = 460;
+    var FUR = '#c98a4b', FUR_DARK = '#8a5a2b', NOSE = '#3a2313';
+
+    function resize(){
+      var w = getWidth();
+      var dpr = Math.min(window.devicePixelRatio||1, 2);
+      canvasEl.width = Math.max(1, Math.round(w*dpr));
+      canvasEl.height = Math.max(1, Math.round(height*dpr));
+      canvasEl.style.width = '100%';
+      canvasEl.style.height = height+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    function lerp(a,b,t){ return a+(b-a)*t; }
+
+    function drawShadow(x, groundY, scale){
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(x, groundY+6, 22*scale, 6*scale, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawDogRunning(x, y, mirror, gait){
+      var dir = mirror ? -1 : 1;
+      var bob = Math.abs(Math.sin(gait*14))*3;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+      var bodyY = -14 - bob;
+
+      var tailWag = Math.sin(gait*10)*10;
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-20, bodyY+4);
+      ctx.quadraticCurveTo(-30, bodyY-6+tailWag*0.3, -34+tailWag*0.4, bodyY-14+tailWag);
+      ctx.stroke();
+
+      var legSwing1 = Math.sin(gait*14)*12;
+      var legSwing2 = Math.sin(gait*14+Math.PI)*12;
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(14, bodyY+8); ctx.lineTo(14+legSwing1*0.5, bodyY+24); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-12, bodyY+8); ctx.lineTo(-12+legSwing2*0.5, bodyY+24); ctx.stroke();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath();
+      ctx.ellipse(0, bodyY, 24, 13, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      var headX = 26, headY = bodyY-10;
+      var earFlap = Math.sin(gait*14)*4;
+      ctx.fillStyle = FUR_DARK;
+      ctx.beginPath();
+      ctx.ellipse(headX-2, headY-6+earFlap*0.2, 5, 9, -0.3, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath(); ctx.ellipse(headX, headY, 11, 10, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(headX+10, headY+3, 6, 5, 0, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = NOSE;
+      ctx.beginPath(); ctx.arc(headX+15, headY+3, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(headX+5, headY-2, 1.6, 0, Math.PI*2); ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawDogStanding(x, y, mirror, squeeze, armWrap){
+      var dir = mirror ? -1 : 1;
+      var s = squeeze;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-6,-4); ctx.lineTo(-6,10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6,-4); ctx.lineTo(6,10); ctx.stroke();
+
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-10,-14*s); ctx.quadraticCurveTo(-22,-18*s,-17,-32*s); ctx.stroke();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath();
+      ctx.ellipse(0, -24*s, 13*s, 20*s, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      var headY = -52*s;
+      ctx.fillStyle = FUR_DARK;
+      ctx.beginPath(); ctx.ellipse(-4, headY-6, 5, 9, -0.3, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath(); ctx.ellipse(2, headY, 11, 10, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(9, headY+4, 6, 5, 0, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = NOSE;
+      ctx.beginPath(); ctx.arc(14, headY+4, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6, headY-2, 1.6, 0, Math.PI*2); ctx.fill();
+
+      ctx.strokeStyle = FUR; ctx.lineWidth = 7; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(9, -32*s);
+      ctx.quadraticCurveTo(24, -36*s, 20+14*armWrap, -14*s);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawExplosion(x, y, t){
+      ctx.save();
+      var puffCount = 7;
+      for (var i=0;i<puffCount;i++){
+        var ang = (i/puffCount)*Math.PI*2;
+        var dist = t*38;
+        var px = x + Math.cos(ang)*dist;
+        var py = y + Math.sin(ang)*dist*0.6;
+        ctx.globalAlpha = Math.max(0, 0.8*(1-t));
+        ctx.fillStyle = '#e7ebf0';
+        ctx.beginPath();
+        ctx.arc(px, py, 6+t*8, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.font = (26+t*30)+'px Arial';
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = Math.max(0, 1-t*1.1);
+      ctx.fillText('💥', x, y+8);
+      ctx.restore();
+    }
+
+    function drawHeart(x, y, ageFrac){
+      var alpha;
+      if (ageFrac<0.2) alpha = ageFrac/0.2;
+      else if (ageFrac>0.7) alpha = 1-(ageFrac-0.7)/0.3;
+      else alpha = 1;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.font = '22px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('💗', x, y);
+      ctx.restore();
+    }
+
+    var VARIANT_PHASES = [
+      ['enter','pause','explode','clear'],
+      ['enter','hug','hold','release','exit']
+    ];
+    var VARIANT_DURATIONS = [
+      {enter:1.3, pause:0.5, explode:0.7, clear:0.3},
+      {enter:1.3, hug:0.6, hold:2.6, release:0.6, exit:0.9}
+    ];
+
+    var dog = {active:false, variant:-1, phase:'', t:0, gait:0, hearts:[], heartTimer:0};
+
+    function trigger(){
+      if (dog.active) return false;
+      dog.active = true;
+      dog.variant = (dog.variant+1) % 2;
+      dog.phase = VARIANT_PHASES[dog.variant][0];
+      dog.t = 0; dog.gait = 0; dog.hearts = []; dog.heartTimer = 0;
+      canvasEl.style.display = 'block';
+      resize();
+      return true;
+    }
+
+    function update(dt){
+      if (!dog.active) return;
+      dog.gait += dt;
+      dog.t += dt;
+      var order = VARIANT_PHASES[dog.variant];
+      var durations = VARIANT_DURATIONS[dog.variant];
+      var dur = durations[dog.phase];
+      if (dog.t >= dur){
+        dog.t = 0;
+        var idx = order.indexOf(dog.phase)+1;
+        if (idx >= order.length){
+          dog.active = false;
+          canvasEl.style.display = 'none';
+          return;
+        }
+        dog.phase = order[idx];
+      }
+      if (dog.variant===1 && dog.phase==='hold'){
+        dog.heartTimer += dt;
+        if (dog.heartTimer > 0.45){
+          dog.heartTimer = 0;
+          dog.hearts.push({dx:(Math.random()-0.5)*50, age:0, life:1.3});
+        }
+      }
+      for (var i=dog.hearts.length-1;i>=0;i--){
+        dog.hearts[i].age += dt;
+        if (dog.hearts[i].age > dog.hearts[i].life) dog.hearts.splice(i,1);
+      }
+    }
+
+    function render(){
+      if (!dog.active) return;
+      var w = getWidth();
+      ctx.clearRect(0,0,w,height);
+      var centerX = w/2, groundY = height-70;
+      var durations = VARIANT_DURATIONS[dog.variant];
+      var t = Math.min(1, dog.t/durations[dog.phase]);
+
+      if (dog.variant===0){
+        if (dog.phase==='enter'){
+          var x = lerp(-40, centerX, easeInOutCubic(t));
+          drawShadow(x, groundY, 1);
+          drawDogRunning(x, groundY, false, dog.gait);
+        } else if (dog.phase==='pause'){
+          drawShadow(centerX, groundY, 1);
+          drawDogRunning(centerX, groundY, false, dog.gait*0.15);
+        } else if (dog.phase==='explode'){
+          drawExplosion(centerX, groundY-16, t);
+        }
+      } else {
+        if (dog.phase==='enter'){
+          var et = easeInOutCubic(t);
+          var ax = lerp(-40, centerX-16, et);
+          var bx = lerp(w+40, centerX+16, et);
+          drawShadow(ax, groundY, 1); drawShadow(bx, groundY, 1);
+          drawDogRunning(ax, groundY, false, dog.gait);
+          drawDogRunning(bx, groundY, true, dog.gait);
+        } else if (dog.phase==='hug'){
+          drawShadow(centerX-16, groundY, 1); drawShadow(centerX+16, groundY, 1);
+          drawDogStanding(centerX-16, groundY, false, 1, t);
+          drawDogStanding(centerX+16, groundY, true, 1, t);
+        } else if (dog.phase==='hold'){
+          var squeeze = 1+0.05*Math.sin(dog.t*6);
+          drawShadow(centerX-16, groundY, 1); drawShadow(centerX+16, groundY, 1);
+          drawDogStanding(centerX-16, groundY, false, squeeze, 1);
+          drawDogStanding(centerX+16, groundY, true, squeeze, 1);
+          for (var i=0;i<dog.hearts.length;i++){
+            var h = dog.hearts[i];
+            var af = h.age/h.life;
+            drawHeart(centerX+h.dx, groundY-70-af*22, af);
+          }
+        } else if (dog.phase==='release'){
+          var ax2 = lerp(centerX-16, centerX-30, t);
+          var bx2 = lerp(centerX+16, centerX+30, t);
+          var wrap = lerp(1, 0.3, t);
+          drawShadow(ax2, groundY, 1); drawShadow(bx2, groundY, 1);
+          drawDogStanding(ax2, groundY, false, 1, wrap);
+          drawDogStanding(bx2, groundY, true, 1, wrap);
+        } else if (dog.phase==='exit'){
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1-t);
+          var ax3 = centerX-30-t*24;
+          var bx3 = centerX+30+t*24;
+          drawDogStanding(ax3, groundY, false, 1, 0.2);
+          drawDogStanding(bx3, groundY, true, 1, 0.2);
+          ctx.restore();
+        }
+      }
+    }
+
+    return {trigger:trigger, update:update, render:render, resize:resize, isActive:function(){ return dog.active; }};
+  }
+
   /* ================= WIRING ================= */
 
   var outerWrap = document.getElementById('ruthOuter');
@@ -1369,6 +1673,7 @@
   var overview = createOverviewScene(canvasOverview, getWidth, {tagEls:tagEls});
   var zoom = createZoomScene(canvasZoom, getWidth, {trackBtn:trackBtn, throughBtn:throughBtn, captionEl:captionEl});
   var statsChart = createStatsChart(statsCanvas);
+  var dogAnimator = createDogAnimator(document.getElementById('dogCanvas'), getWidth);
 
   overview.bindCounters(document.getElementById('cntThrough'), document.getElementById('cntSide'), document.getElementById('cntBack'));
   zoom.bindCounters(document.getElementById('cntThroughZ'), document.getElementById('cntSideZ'), document.getElementById('cntBackZ'));
@@ -1393,7 +1698,7 @@
   function syncGunBtn(){
     gunBtn.classList.toggle('on', SHARED.gunEnabled);
     gunBtn.classList.toggle('off-state', !SHARED.gunEnabled);
-    gunBtn.textContent = SHARED.gunEnabled ? 'Canon : activé' : 'Canon : désactivé';
+    gunBtn.textContent = SHARED.gunEnabled ? 'Éteindre le canon' : 'Allumer le canon';
     if (trackBtn) trackBtn.disabled = !SHARED.gunEnabled || zoom.isTracking();
     if (throughBtn) throughBtn.disabled = !SHARED.gunEnabled || zoom.isTracking();
   }
@@ -1435,6 +1740,12 @@
     SHARED.stats.back = 0;
   });
 
+  var dogBtn = document.getElementById('dogBtn');
+  dogBtn.addEventListener('click', function(){
+    if (dogAnimator.isActive()) return;
+    dogAnimator.trigger();
+  });
+
   var statSentEl = document.getElementById('statSent');
   var statSideEl = document.getElementById('statSide');
   var statThroughEl = document.getElementById('statThrough');
@@ -1450,6 +1761,7 @@
   var panelOverview = document.getElementById('panelOverview');
   var panelZoom = document.getElementById('panelZoom');
   var panelStats = document.getElementById('panelStats');
+  var panelConclusion = document.getElementById('panelConclusion');
   var tabBtns = document.querySelectorAll('.ruth-tab-btn');
   for (var t=0; t<tabBtns.length; t++){
     tabBtns[t].addEventListener('click', function(){
@@ -1464,6 +1776,7 @@
       panelOverview.style.display = target==='overview' ? 'block':'none';
       panelZoom.style.display = target==='zoom' ? 'block':'none';
       panelStats.style.display = target==='stats' ? 'block':'none';
+      panelConclusion.style.display = target==='conclusion' ? 'block':'none';
       overview.resize(); zoom.resize(); statsChart.resize();
     });
   }
@@ -1472,13 +1785,19 @@
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
+    if (dogAnimator.isActive()){
+      dogAnimator.update(dt);
+      dogAnimator.render();
+      if (currentTab === 'overview') overview.animateStep(0);
+      return;
+    }
     if (currentTab === 'overview') overview.animateStep(dt);
     else if (currentTab === 'zoom') zoom.animateStep(dt);
-    else { statsChart.draw(dt); updateStatsLegend(); }
+    else if (currentTab === 'stats') { statsChart.draw(dt); updateStatsLegend(); }
   }
   loop();
 
-  window.addEventListener('resize', function(){ overview.resize(); zoom.resize(); statsChart.resize(); });
+  window.addEventListener('resize', function(){ overview.resize(); zoom.resize(); statsChart.resize(); dogAnimator.resize(); });
 })();
 </script>
 
