@@ -2,12 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Composition de l'air et des atmosphères planétaires - Animation</title>
 <style>
-  * {
-    box-sizing: border-box;
-  }
   body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
@@ -15,42 +12,67 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    -webkit-text-size-adjust: 100%;
+    padding: 8px;
     -webkit-tap-highlight-color: transparent;
   }
   h1 {
     color: #1b3a5c;
     text-align: center;
-    margin-bottom: 5px;
+    margin: 4px 0 5px;
+    font-size: 22px;
   }
-  p.subtitle {
-    color: #555;
-    margin-top: 0;
-    text-align: center;
-  }
-
   .back-link {
     align-self: flex-start;
-    font-size: 14px;
+    font-size: 13px;
     color: #1b3a5c;
     text-decoration: none;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
   .back-link:hover {
     text-decoration: underline;
   }
+  p.subtitle {
+    color: #555;
+    margin: 0 0 4px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  /* Pas de barre de défilement visible nulle part, mais le contenu reste scrollable */
+  html, body {
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  #rappelsContent, #quizContent, #finalContent {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #rappelsContent::-webkit-scrollbar,
+  #quizContent::-webkit-scrollbar,
+  #finalContent::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 
   #tabs {
     display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    margin-bottom: 14px;
     flex-wrap: wrap;
+    gap: 4px;
+    row-gap: 4px;
+    margin-top: 0;
+    margin-bottom: 8px;
     justify-content: center;
   }
   .tabBtn {
-    padding: 9px 20px;
+    padding: 8px 9px;
     font-size: 15px;
     font-weight: bold;
     border: 2px solid #1b3a5c;
@@ -58,6 +80,8 @@
     background: white;
     color: #1b3a5c;
     cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
   }
   .tabBtn:hover {
     background: #dceaf7;
@@ -70,13 +94,16 @@
   #container {
     position: relative;
     width: 700px;
-    max-width: 100%;
+    max-width: 95vw;
     height: 450px;
     border: 3px solid #1b3a5c;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  #container.quiz-mode {
+    height: 470px;
   }
   canvas {
     display: block;
@@ -93,13 +120,30 @@
   }
   .legend-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-size: 16px;
     background: white;
     padding: 8px 14px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .legend-item-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-count {
+    display: inline-block;
+    min-width: 26px;
+    text-align: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #eef2f7;
+    color: #1b3a5c;
+    font-weight: 700;
+    font-size: 13px;
   }
   .dot {
     width: 18px;
@@ -108,14 +152,24 @@
     display: inline-block;
     flex-shrink: 0;
   }
+  .legend-label-short {
+    display: none;
+  }
 
-  #controls {
+  #bottomZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
     margin-top: 18px;
+    width: 100%;
+  }
+  #buttonRow {
     display: flex;
     gap: 15px;
     align-items: center;
-    flex-wrap: wrap;
     justify-content: center;
+    flex-wrap: wrap;
   }
   button {
     padding: 8px 18px;
@@ -125,6 +179,7 @@
     background: #1b3a5c;
     color: white;
     cursor: pointer;
+    touch-action: manipulation;
   }
   button:hover {
     background: #2c557f;
@@ -153,21 +208,11 @@
   .modeBtn:hover {
     background: #dceaf7;
   }
+  #btnDetail {
+    margin-left: 20px;
+  }
 
-  #pressureBlock {
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  #pressureHint {
-    font-size: 13px;
-    color: #666;
-    max-width: 560px;
-    text-align: center;
-  }
-  #pressureLabel {
+  #pressureLabel, #vieO2Label {
     font-weight: bold;
     font-size: 15px;
   }
@@ -191,6 +236,7 @@
     padding: 24px 20px;
     box-sizing: border-box;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .rappels-intro {
     font-size: 16px;
@@ -271,9 +317,14 @@
   .legend-block {
     background: white;
     border-radius: 12px;
-    padding: 16px 22px;
+    padding: 14px 24px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    max-width: 480px;
+    max-width: 600px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 26px;
+    row-gap: 4px;
+    align-items: center;
   }
   .legend-block p {
     margin: 6px 0;
@@ -285,110 +336,381 @@
     color: #6d28d9;
   }
 
-  /* Écrans étroits : compacter pour que tout tienne sans rognage */
-  @media (max-width: 600px) {
-    body {
-      padding: 12px;
-    }
-    h1 {
-      font-size: 20px;
-      margin-top: 6px;
-      margin-bottom: 4px;
-    }
-    p.subtitle {
-      font-size: 13px;
-    }
-    #tabs {
-      gap: 6px;
-      margin-top: 8px;
-      margin-bottom: 10px;
-    }
-    .tabBtn {
-      padding: 8px 12px;
-      font-size: 13px;
-      min-height: 40px;
-      border-radius: 8px;
-    }
-    #container {
-      height: 58vh;
-      min-height: 280px;
-    }
+  /* --- Onglet Mystère --- */
+  .mystery-banner {
+    display: none;
+    max-width: 640px;
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    border: 2px solid #6d28d9;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 4px;
+    text-align: center;
+    color: #4c1d95;
+    font-size: 16.5px;
+    line-height: 1.5;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  }
+  .mystery-banner b { color: #4c1d95; }
+
+  /* --- Onglet Quizz --- */
+  #quizContent {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .quiz-columns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .quiz-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .quiz-chart {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 6px;
+    width: 128px;
+    height: 145px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #d6c8b8;
+    padding: 6px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .quiz-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    flex: 1;
+    height: 100%;
+  }
+  .quiz-bar {
+    width: 18px;
+    border-radius: 4px 4px 0 0;
+    min-height: 4px;
+    transition: height 0.3s ease;
+    flex-shrink: 0;
+  }
+  .quiz-bar-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    min-height: 34px;
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #444;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .quiz-bar-label svg { display: block; }
+  .quiz-dropzone {
+    width: 128px;
+    height: 78px;
+    border: 3px dashed #b08d57;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .quiz-dropzone.hover {
+    background: rgba(250, 204, 21, 0.25);
+    border-color: #ea580c;
+  }
+  .quiz-dropzone::before {
+    content: '?';
+    font-size: 24px;
+    color: #d6c8b8;
+    font-weight: bold;
+  }
+  .quiz-dropzone.filled::before { content: ''; }
+  .quiz-bank {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 78px;
+    align-items: center;
+    padding: 8px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 460px;
+    box-sizing: border-box;
+  }
+  .quiz-photo {
+    width: 74px;
+    height: 74px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .quiz-photo:active { cursor: grabbing; }
+  .quiz-photo.dragging {
+    position: fixed;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    transform: scale(1.08);
+  }
+  #quizCheckBtn {
+    background: #7c2d12;
+    font-size: 16px;
+    padding: 10px 26px;
+  }
+  #quizCheckBtn:hover { background: #9a3b1a; }
+
+  #quizFlashZone {
+    display: none;
+    width: 700px;
+    max-width: 95vw;
+    margin: 0 auto 10px;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    box-sizing: border-box;
+  }
+  #quizFlashZone.flash-correct {
+    background: #16a34a;
+    box-shadow: 0 0 22px 8px rgba(34,197,94,0.8);
+  }
+  #quizFlashZone.flash-wrong {
+    background: #dc2626;
+    box-shadow: 0 0 22px 8px rgba(220,38,38,0.8);
+  }
+  #quizFlashZone.blinking {
+    animation: quizBlink 0.25s steps(1, start) 5;
+  }
+  @keyframes quizBlink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  /* --- Onglet Questions à faire --- */
+  #finalContent {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px 24px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .final-dog-track {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 46px;
+    flex: 0 0 auto;
+  }
+  .final-dog-run {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    font-size: 32px;
+    transform: scaleX(-1);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+  }
+  .final-dog-glare {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 4px;
+    font-size: 38px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+  }
+  .glare-mark {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    font-size: 18px;
+    display: inline-block;
+    animation: glareShake 0.55s ease-in-out infinite;
+  }
+  @keyframes glareShake {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+  }
+  .questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .question-tag {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: white;
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .q-num {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+  }
+  .question-color-1 { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+  .question-color-2 { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+  .question-color-3 { background: linear-gradient(135deg, #ea580c, #fb923c); }
+  .questions-info {
+    font-size: 13.5px;
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+  }
+
+  /* ================= Adaptations mobile / tactile ================= */
+  @media (max-width: 640px) {
+    body { padding: 4px; }
+    h1 { font-size: 15px; margin: 2px 0 3px; }
+    p.subtitle { font-size: 11px; margin: 0 0 3px; }
+
+    #tabs { gap: 3px; row-gap: 3px; margin-top: 0; margin-bottom: 5px; }
+    .tabBtn { padding: 6px 6px; font-size: 12.5px; }
+
+    #quizFlashZone { margin: 0 auto 4px; padding: 8px; font-size: 17px; }
+    .mystery-banner { font-size: 12.5px; padding: 7px 10px; margin-bottom: 3px; }
+
+    #container { height: 300px; }
+    #container.quiz-mode { height: 340px; }
+
+    /* --- Légende : les gaz d'une même planète sur une seule ligne (2 lignes si 4 gaz) --- */
+    .legend-label-full { display: none; }
+    .legend-label-short { display: inline; }
     #legend {
-      gap: 8px;
-      margin-top: 12px;
+      gap: 4px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+      align-items: stretch;
     }
     .legend-item {
-      font-size: 12px;
-      padding: 5px 9px;
+      font-size: 10.5px;
+      padding: 4px 4px;
+      gap: 2px;
+      text-align: center;
     }
-    .dot {
-      width: 14px;
-      height: 14px;
+    .legend-item-top { gap: 3px; flex-wrap: wrap; justify-content: center; }
+    .legend-count { font-size: 10px; padding: 1px 6px; min-width: 18px; }
+    .dot { width: 11px; height: 11px; }
+    #legend[data-count="3"] .legend-item { flex: 0 1 31%; }
+    #legend[data-count="4"] .legend-item { flex: 0 1 46%; }
+
+    /* --- Curseurs + boutons regroupés proprement en bas --- */
+    #bottomZone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+      margin-top: 6px;
     }
-    #controls {
-      margin-top: 12px;
-      gap: 10px;
+    #buttonRow {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
     }
-    button {
-      padding: 8px 14px;
-      font-size: 13px;
-      min-height: 40px;
-      touch-action: manipulation;
+    #btnDetail { margin-left: 0; }
+
+    .sliderRow {
+      gap: 5px;
+      flex-wrap: nowrap;
+      justify-content: center;
+      width: 100%;
     }
-    input[type=range] {
-      width: 120px;
-      min-height: 40px;
-      touch-action: manipulation;
+    .sliderRow label { font-size: 12.5px; white-space: nowrap; flex-shrink: 0; }
+    #tempLabel, #moleculeLabel, #pressureLabel, #vieO2Label {
+      font-size: 12.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    #pressureHint {
-      font-size: 12px;
+    input[type=range] { width: 62px; flex-shrink: 1; }
+    button { padding: 6px 9px; font-size: 12.5px; }
+
+    #counter { margin-top: 4px; font-size: 12.5px; }
+
+    /* --- Rappels de calculs : étiquette jaune à côté de sa formule --- */
+    .rappels-intro { font-size: 12.5px; }
+    #rappelsContent { padding: 8px 6px; gap: 8px; }
+    .formula-row {
+      flex-wrap: nowrap;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
     }
-    #pressureLabel {
-      font-size: 14px;
-    }
-    #counter {
-      font-size: 12px;
-      margin-top: 10px;
-    }
-    #rappelsContent {
-      padding: 14px 10px;
-      gap: 12px;
-    }
-    .rappels-intro {
-      font-size: 13px;
-    }
-    .formula-box {
-      padding: 12px 16px;
-      font-size: 21px;
-      gap: 8px;
-    }
-    .fx-eq {
-      font-size: 20px;
-    }
-    .fraction {
-      font-size: 17px;
-    }
-    .fx-letter sub {
-      font-size: 12px;
-    }
-    .fraction sub {
-      font-size: 11px;
-    }
-    .note-bubble {
-      font-size: 12px;
-      padding: 9px 12px;
-      max-width: 100%;
-      transform: none;
-    }
-    .note-bubble::before {
-      display: none;
-    }
-    .legend-block {
-      padding: 12px 14px;
-    }
-    .legend-block p {
-      font-size: 13px;
-    }
+    .formula-box { font-size: 15px; padding: 7px 9px; gap: 4px; flex-shrink: 0; }
+    .fx-eq { font-size: 14px; }
+    .fraction { font-size: 12px; }
+    .note-bubble { font-size: 9.5px; padding: 6px 7px; max-width: 105px; flex-shrink: 1; }
+    .legend-block { padding: 8px 10px; }
+    .legend-block p { font-size: 11px; margin: 3px 0; }
+
+    /* --- Quizz : les 3 diagrammes sur une seule ligne, colonnes resserrées --- */
+    #quizContent { padding: 6px 6px; gap: 5px; }
+    .quiz-columns { gap: 4px; flex-wrap: nowrap; justify-content: center; }
+    .quiz-col { gap: 3px; }
+    .quiz-chart { width: 82px; height: 100px; gap: 3px; padding: 4px; }
+    .quiz-bar { width: 12px; }
+    .quiz-bar-label { font-size: 9px; min-height: 12px; }
+    .quiz-dropzone { width: 82px; height: 56px; }
+    .quiz-photo { width: 48px; height: 48px; }
+    .quiz-bank { gap: 8px; }
+
+    #finalContent { padding: 10px 12px; gap: 8px; }
+    .final-dog-run, .final-dog-glare { font-size: 24px; }
+    .questions-list { gap: 8px; }
+    .question-tag { font-size: 12.5px; padding: 9px 11px; gap: 8px; }
+    .q-num { width: 20px; height: 20px; font-size: 11px; }
   }
 </style>
 </head>
@@ -397,16 +719,23 @@
 <a class="back-link" href="../seconde/">&larr; Retour aux animations de Seconde</a>
 
 <h1 id="title">La composition de l'air (Terre)</h1>
-<p class="subtitle" id="subtitle">L'air est un mélange de plusieurs espèces chimiques (gaz)</p>
+<p class="subtitle" id="subtitle"></p>
 
 <div id="tabs">
-  <button class="tabBtn active" id="tab_earth">Terre</button>
+  <button class="tabBtn active" id="tab_final">Questions à faire</button>
+  <button class="tabBtn" id="tab_earth">Terre</button>
   <button class="tabBtn" id="tab_mars">Mars</button>
-  <button class="tabBtn" id="tab_venus">Vénus</button>
   <button class="tabBtn" id="tab_vie">Vie</button>
+  <button class="tabBtn" id="tab_mystery">Mystère</button>
   <button class="tabBtn" id="tab_rappels">Rappels calculs</button>
+  <button class="tabBtn" id="tab_quiz">Quizz</button>
 </div>
 
+<div class="mystery-banner" id="mysteryBanner">
+  💨 <b>16 %</b> de O₂ dans l'air est le minimum pour que l'être humain puisse respirer.
+</div>
+
+<div id="quizFlashZone"></div>
 <div id="container">
   <canvas id="canvas"></canvas>
   <div id="rappelsContent">
@@ -432,6 +761,7 @@
         </span>
         <span class="fx-eq">&times; 100</span>
       </div>
+      <div class="note-bubble">Fais le calcul et arrondis le résultat à 1 chiffre après la virgule.</div>
     </div>
     <div class="legend-block">
       <p><span class="legend-symbol">P</span> = proportion</p>
@@ -440,36 +770,60 @@
       <p><span class="legend-symbol">N<sub>totale</sub></span> = nombre total de molécules</p>
     </div>
   </div>
+  <div id="quizContent">
+    <div class="quiz-columns" id="quizColumns"></div>
+    <div class="quiz-bank" id="quizBank"></div>
+    <div style="display:flex; gap:12px;">
+      <button id="quizCheckBtn">Vérifier ma réponse</button>
+      <button id="quizResetBtn" class="modeBtn">🔀 Mélanger à nouveau</button>
+    </div>
+  </div>
+  <div id="finalContent">
+    <div class="final-dog-track" id="finalDogTrack">
+      <span class="final-dog-run" id="finalDogRun">🐕</span>
+      <span class="final-dog-glare" id="finalDogGlare">🐶<span class="glare-mark">💢</span></span>
+    </div>
+    <div class="questions-list">
+      <div class="question-tag question-color-1"><span class="q-num">1</span><span>Donner les compositions en % des atmosphères de la Terre et de Mars.</span></div>
+      <div class="question-tag question-color-2"><span class="q-num">2</span><span>L'atmosphère mystère est-elle viable pour l'être humain ? Justifie par des calculs.</span></div>
+      <div class="question-tag question-color-3"><span class="q-num">3</span><span>Explique où tu as pu voir un corps pur dans cette animation.</span></div>
+    </div>
+    <p class="questions-info">ℹ️ La partie Quizz n'est pas évaluée.</p>
+  </div>
 </div>
 
 <div id="legend"></div>
 
-<div id="controls">
-  <button id="toggleBtn">Pause</button>
-  <div class="sliderRow">
-    <label for="speedRange">Température :</label>
-    <input type="range" id="speedRange" min="0.2" max="3" step="0.1" value="1">
-    <span id="tempLabel">20 °C</span>
-  </div>
-  <button id="resetBtn">Réinitialiser</button>
+<div id="bottomZone">
+<div class="sliderRow" id="tempRow">
+  <label for="speedRange">Température :</label>
+  <input type="range" id="speedRange" min="0.2" max="3" step="0.1" value="1">
+  <span id="tempLabel">20 °C</span>
 </div>
 
-<div id="modelControls">
-  <div class="sliderRow">
-    <label for="moleculeRange">Nombre de molécules :</label>
-    <input type="range" id="moleculeRange" min="100" max="250" step="5" value="150">
-    <span id="moleculeLabel">150</span>
-  </div>
+<div class="sliderRow" id="moleculeRow">
+  <label for="moleculeRange">Nb de molécules :</label>
+  <input type="range" id="moleculeRange" min="100" max="250" step="5" value="150">
+  <span id="moleculeLabel">150</span>
+</div>
+
+<div class="sliderRow" id="pressureRow">
+  <label for="pressureRange">Pression :</label>
+  <input type="range" id="pressureRange" min="0" max="100" step="1" value="0">
+  <span id="pressureLabel">Normale (0)</span>
+</div>
+
+<div class="sliderRow" id="vieRatRow" style="display:none;">
+  <label for="vieKillRange">Tuer le rat :</label>
+  <input type="range" id="vieKillRange" min="0" max="100" step="1" value="0">
+  <span id="vieO2Label">100% O₂</span>
+</div>
+
+<div id="buttonRow">
+  <button id="toggleBtn">Pause</button>
+  <button id="resetBtn">Réinitialiser</button>
   <button class="modeBtn" id="btnDetail">Modèle détaillé</button>
 </div>
-
-<div id="pressureBlock">
-  <div class="sliderRow">
-    <label for="pressureRange">Pression :</label>
-    <input type="range" id="pressureRange" min="0" max="100" step="1" value="0">
-    <span id="pressureLabel">Pression normale (0)</span>
-  </div>
-  <p id="pressureHint">En augmentant la pression, les parois se resserrent sur les molécules. Une pression trop forte fait céder les parois : les molécules sont alors expulsées et s'échappent par les bords de l'écran.</p>
 </div>
 
 <div id="counter"></div>
@@ -496,38 +850,40 @@ const planets = {
     key: 'earth',
     tabLabel: 'Terre',
     title: "La composition de l'air (Terre)",
-    subtitle: "L'air est un mélange de plusieurs espèces chimiques (gaz)",
+    subtitle: "",
     bg: '#eaf4ff',
     border: '#1b3a5c',
     gases: [
       { key: 'N2', label: 'Diazote N\u2082', color: '#3b82f6', prop: 0.78, r: 6, atoms: 2 },
       { key: 'O2', label: 'Dioxygène O\u2082', color: '#ef4444', prop: 0.21, r: 6.5, atoms: 2 },
-      { key: 'other', label: 'Autres gaz : CO\u2082, Ar...', color: '#22c55e', prop: 0.01, r: 5, atoms: 1 }
+      { key: 'other', label: 'Autres gaz : CO\u2082, Ar...', short: 'Autres gaz', color: '#22c55e', prop: 0.01, r: 5, atoms: 1 }
     ]
   },
   mars: {
     key: 'mars',
     tabLabel: 'Mars',
     title: "L'atmosphère de Mars",
-    subtitle: "Une atmosphère très fine et ténue, presque entièrement composée de CO\u2082",
+    subtitle: "",
     bg: '#f0a868',
     border: '#8a3d1a',
     gases: [
-      { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', color: '#a855f7', prop: 0.95, r: 7, atoms: 3 },
+      { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', short: 'Dioxyde de carbone', color: '#a855f7', prop: 0.95, r: 7, atoms: 3 },
       { key: 'N2', label: 'Diazote N\u2082', color: '#3b82f6', prop: 0.03, r: 6, atoms: 2 },
-      { key: 'other', label: 'Autres gaz : Ar...', color: '#22c55e', prop: 0.02, r: 5, atoms: 1 }
+      { key: 'other', label: 'Autres gaz : Ar...', short: 'Autres gaz', color: '#22c55e', prop: 0.02, r: 5, atoms: 1 }
     ]
   },
-  venus: {
-    key: 'venus',
-    tabLabel: 'Vénus',
-    title: "L'atmosphère de Vénus",
-    subtitle: "Une atmosphère extrêmement dense et écrasante, riche en CO\u2082",
-    bg: '#f7f0ad',
-    border: '#8a7a12',
+  mystery: {
+    key: 'mystery',
+    tabLabel: 'Mystère',
+    title: "",
+    subtitle: "",
+    bg: '#ede9fe',
+    border: '#5b21b6',
     gases: [
-      { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', color: '#a855f7', prop: 0.965, r: 7, atoms: 3 },
-      { key: 'N2', label: 'Diazote N\u2082', color: '#3b82f6', prop: 0.035, r: 6, atoms: 2 }
+      { key: 'N2', label: 'Diazote N\u2082', color: '#3b82f6', prop: 0.70, r: 6, atoms: 2 },
+      { key: 'O2', label: 'Dioxygène O\u2082', color: '#ef4444', prop: 0.14, r: 6.5, atoms: 2 },
+      { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', short: 'Dioxyde de carbone', color: '#a855f7', prop: 0.10, r: 7, atoms: 3 },
+      { key: 'other', label: 'Autres gaz : Ar, CH\u2084...', short: 'Autres gaz', color: '#22c55e', prop: 0.06, r: 5, atoms: 1 }
     ]
   }
 };
@@ -535,46 +891,34 @@ const planets = {
 // --- Onglet "Vie" : un rat, du dioxygène, puis plus de dioxygène ---
 const vieConfig = {
   title: "La vie a besoin de dioxygène",
-  subtitle: "Une même quantité de gaz, mais une composition qui change tout",
+  subtitle: "",
   bg: '#eaf7ea',
   border: '#166534'
 };
 
 const GAS_O2 = { key: 'O2', label: 'Dioxygène O\u2082', color: '#ef4444', r: 6.5, atoms: 2 };
-const GAS_CO2 = { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', color: '#a855f7', r: 7, atoms: 3 };
+const GAS_CO2 = { key: 'CO2', label: 'Dioxyde de carbone CO\u2082', short: 'Dioxyde de carbone', color: '#a855f7', r: 7, atoms: 3 };
 const GAS_N2 = { key: 'N2', label: 'Diazote N\u2082', color: '#3b82f6', r: 6, atoms: 2 };
 
-const VIE_PHASES = [
-  'wait_before_enter', 'enter_happy', 'center_happy', 'exit_happy',
-  'gas_transform',
-  'wait_before_enter_sad', 'enter_sad', 'center_sad', 'dying', 'dissolving',
-  'wait_before_reset'
-];
-const VIE_DURATIONS = {
-  wait_before_enter: 500,
-  enter_happy: 2200,
-  center_happy: 2600,
-  exit_happy: 1800,
-  gas_transform: 700,
-  wait_before_enter_sad: 500,
-  enter_sad: 2600,
-  center_sad: 2600,
-  dying: 1200,
-  dissolving: 1300,
-  wait_before_reset: 1200
-};
+// Vitesses de course du rat, en pixels par milliseconde.
+const VIE_SPEED_FAST = 0.11;   // O2 > 20 %
+const VIE_SPEED_SLOW = 0.04;   // 15 % <= O2 <= 20 %
+const VIE_O2_SLOW_THRESHOLD = 20;
+const VIE_O2_DEATH_THRESHOLD = 15;
+const VIE_PAUSE_DURATION = 1300;   // arrêt au milieu, coeurs affichés pendant ce temps
+const VIE_DEATH_DURATION = 900;    // durée de l'animation « il meurt »
+const VIE_MARGIN = 40;             // distance aux bords où le rat fait demi-tour
 
 let vieState = {
   totalParticles: 50,
   particles: [],
   detailedModel: true,
-  gasPhase: 'o2',
-  phaseIndex: 0,
-  phaseElapsed: 0,
+  o2Percent: 100,
+  alive: true,
   lastFrameTime: null,
   lastEffectSpawn: 0,
   effects: [],
-  rat: { x: -40, bounce: 0, lie: 0, opacity: 1 },
+  rat: { x: VIE_MARGIN, dir: 1, bounce: 0, lie: 0, opacity: 1, paused: false, pauseElapsed: 0, deathElapsed: 0 },
   initialized: false
 };
 
@@ -592,96 +936,140 @@ function addVieMolecule(gas) {
   });
 }
 
-function createVieParticles(gasPhase) {
-  vieState.particles = [];
-  vieState.gasPhase = gasPhase;
-  if (gasPhase === 'o2') {
-    for (let i = 0; i < vieState.totalParticles; i++) addVieMolecule(GAS_O2);
-  } else {
-    const co2Count = Math.round(vieState.totalParticles * 0.7);
-    const n2Count = vieState.totalParticles - co2Count;
-    for (let i = 0; i < co2Count; i++) addVieMolecule(GAS_CO2);
-    for (let i = 0; i < n2Count; i++) addVieMolecule(GAS_N2);
+// Répartition des molécules "autres" quand O2 diminue : le manque à gagner
+// est réparti entre CO2 (70%) et N2 (30%), comme pour les autres onglets.
+function computeVieMixCounts(o2Percent) {
+  const total = vieState.totalParticles;
+  const o2Count = Math.round(total * o2Percent / 100);
+  const rest = total - o2Count;
+  const co2Count = Math.round(rest * 0.7);
+  const n2Count = rest - co2Count;
+  return { O2: o2Count, CO2: co2Count, N2: n2Count };
+}
+
+// Transforme les molécules existantes en place (change juste leur type et leur
+// rayon) plutôt que de tout recréer : les molécules d'O2 "se transforment" en
+// d'autres molécules sous les yeux de l'élève, sans que l'animation ne saute.
+function applyVieO2Mix(o2Percent) {
+  const target = computeVieMixCounts(o2Percent);
+  const byKey = { O2: [], CO2: [], N2: [] };
+  vieState.particles.forEach(p => byKey[p.gas.key].push(p));
+
+  function convert(fromKey, toGas, count) {
+    const pool = byKey[fromKey];
+    for (let i = 0; i < count && pool.length; i++) {
+      const p = pool.pop();
+      p.gas = toGas;
+      p.r = toGas.r;
+      byKey[toGas.key].push(p);
+    }
   }
+
+  const diffO2 = target.O2 - byKey.O2.length;
+  if (diffO2 > 0) {
+    let needed = diffO2;
+    const fromCO2 = Math.min(needed, byKey.CO2.length);
+    convert('CO2', GAS_O2, fromCO2);
+    needed -= fromCO2;
+    if (needed > 0) convert('N2', GAS_O2, needed);
+  } else if (diffO2 < 0) {
+    const toConvert = -diffO2;
+    const toCO2 = Math.round(toConvert * 0.7);
+    const toN2 = toConvert - toCO2;
+    convert('O2', GAS_CO2, toCO2);
+    convert('O2', GAS_N2, toN2);
+  }
+
+  vieState.o2Percent = o2Percent;
+}
+
+function setVieO2Percent(o2Percent) {
+  applyVieO2Mix(o2Percent);
+  const wasAlive = vieState.alive;
+  vieState.alive = o2Percent >= VIE_O2_DEATH_THRESHOLD;
+  if (wasAlive && !vieState.alive) {
+    vieState.rat.deathElapsed = 0;
+    vieState.effects.push({
+      type: 'skull',
+      x: vieState.rat.x,
+      y: (canvas.height - 50) - 60,
+      spawnTime: performance.now(),
+      life: 1500
+    });
+  }
+  updateVieCounter();
 }
 
 function initVie() {
   vieState.initialized = true;
-  vieState.phaseIndex = 0;
-  vieState.phaseElapsed = 0;
+  vieState.totalParticles = 50;
+  vieState.o2Percent = 100;
+  vieState.alive = true;
   vieState.lastFrameTime = null;
+  vieState.lastEffectSpawn = 0;
   vieState.effects = [];
-  vieState.rat = { x: -40, bounce: 0, lie: 0, opacity: 1 };
-  createVieParticles('o2');
+  vieState.rat = { x: VIE_MARGIN, dir: 1, bounce: 0, lie: 0, opacity: 1, paused: false, pauseElapsed: 0, deathElapsed: 0 };
+  vieState.particles = [];
+  for (let i = 0; i < vieState.totalParticles; i++) addVieMolecule(GAS_O2);
+
+  const killEl = document.getElementById('vieKillRange');
+  const labelEl = document.getElementById('vieO2Label');
+  if (killEl) killEl.value = 0;
+  if (labelEl) labelEl.textContent = '100% O₂';
 }
 
-function advanceVie() {
-  vieState.phaseIndex = (vieState.phaseIndex + 1) % VIE_PHASES.length;
-  vieState.phaseElapsed = 0;
-  const newPhase = VIE_PHASES[vieState.phaseIndex];
-  if (newPhase === 'gas_transform') {
-    createVieParticles('mix');
-  }
-  if (newPhase === 'wait_before_enter') {
-    createVieParticles('o2');
-    vieState.rat = { x: -40, bounce: 0, lie: 0, opacity: 1 };
-    vieState.effects = [];
-  }
-}
-
-function updateVieRat(phase, t, centerX) {
+function updateVieRat(dt, now) {
   const rat = vieState.rat;
-  switch (phase) {
-    case 'wait_before_enter':
-    case 'wait_before_enter_sad':
-      rat.x = -40; rat.bounce = 0; rat.lie = 0; rat.opacity = 1;
-      break;
-    case 'enter_happy':
-      rat.x = lerp(-40, centerX, t);
-      rat.bounce = Math.abs(Math.sin(t * Math.PI * 8)) * 4;
-      rat.lie = 0; rat.opacity = 1;
-      break;
-    case 'center_happy':
-      rat.x = centerX;
-      rat.bounce = Math.abs(Math.sin(performance.now() / 150)) * 3;
-      break;
-    case 'exit_happy':
-      rat.x = lerp(centerX, canvas.width + 40, t);
-      rat.bounce = Math.abs(Math.sin(t * Math.PI * 10)) * 12;
-      break;
-    case 'gas_transform':
-      rat.x = -40; rat.bounce = 0;
-      break;
-    case 'enter_sad':
-      rat.x = lerp(-40, centerX, t);
-      rat.bounce = Math.abs(Math.sin(t * Math.PI * 4)) * 2;
-      break;
-    case 'center_sad':
-      rat.x = centerX;
-      rat.bounce = Math.abs(Math.sin(performance.now() / 300)) * 1.5;
-      break;
-    case 'dying':
-      rat.x = centerX; rat.bounce = 0;
-      rat.lie = t;
-      break;
-    case 'dissolving':
-      rat.x = centerX; rat.lie = 1;
-      rat.opacity = 1 - t;
-      break;
-    case 'wait_before_reset':
-      rat.opacity = 0;
-      break;
+
+  if (!vieState.alive) {
+    rat.deathElapsed += dt;
+    rat.lie = Math.min(1, rat.deathElapsed / VIE_DEATH_DURATION);
+    rat.bounce = 0;
+    return;
+  }
+
+  if (rat.lie > 0) {
+    rat.lie = Math.max(0, rat.lie - dt / 400);
+  }
+
+  const centerX = canvas.width / 2;
+
+  if (rat.paused) {
+    rat.pauseElapsed += dt;
+    rat.bounce = Math.abs(Math.sin(now / 200)) * 2;
+    if (rat.pauseElapsed >= VIE_PAUSE_DURATION) {
+      rat.paused = false;
+    }
+    return;
+  }
+
+  const speedPxMs = vieState.o2Percent > VIE_O2_SLOW_THRESHOLD ? VIE_SPEED_FAST : VIE_SPEED_SLOW;
+  const prevX = rat.x;
+  let newX = rat.x + rat.dir * speedPxMs * dt;
+
+  if (newX >= canvas.width - VIE_MARGIN) { newX = canvas.width - VIE_MARGIN; rat.dir = -1; }
+  if (newX <= VIE_MARGIN) { newX = VIE_MARGIN; rat.dir = 1; }
+
+  const crossedCenter = (prevX - centerX) * (newX - centerX) < 0;
+  rat.x = newX;
+  rat.bounce = Math.abs(Math.sin(now / (vieState.o2Percent > VIE_O2_SLOW_THRESHOLD ? 110 : 230))) * 4;
+
+  if (crossedCenter) {
+    rat.x = centerX;
+    rat.paused = true;
+    rat.pauseElapsed = 0;
   }
 }
 
-function updateVieEffects(now, phase, centerX, groundY) {
-  if (phase === 'center_happy' || phase === 'center_sad') {
+function updateVieEffects(now) {
+  const rat = vieState.rat;
+  if (vieState.alive && rat.paused) {
     if (now - vieState.lastEffectSpawn > 450) {
       vieState.lastEffectSpawn = now;
       vieState.effects.push({
-        type: phase === 'center_happy' ? 'heart' : 'skull',
-        x: centerX + (Math.random() - 0.5) * 40,
-        y: groundY - 55 + (Math.random() - 0.5) * 10,
+        type: 'heart',
+        x: rat.x + (Math.random() - 0.5) * 30,
+        y: (canvas.height - 50) - 55 + (Math.random() - 0.5) * 10,
         spawnTime: now,
         life: 1300
       });
@@ -709,17 +1097,8 @@ function updateVie(now) {
     if (p.y + p.r > canvas.height) { p.y = canvas.height - p.r; p.vy *= -1; }
   }
 
-  vieState.phaseElapsed += dt;
-  const phase = VIE_PHASES[vieState.phaseIndex];
-  const duration = VIE_DURATIONS[phase];
-  const t = Math.min(vieState.phaseElapsed / duration, 1);
-  const centerX = canvas.width / 2;
-  const groundY = canvas.height - 50;
-
-  updateVieRat(phase, t, centerX);
-  updateVieEffects(now, phase, centerX, groundY);
-
-  if (vieState.phaseElapsed >= duration) advanceVie();
+  updateVieRat(dt, now);
+  updateVieEffects(now);
 }
 
 function drawRat(rat, groundY) {
@@ -732,6 +1111,7 @@ function drawRat(rat, groundY) {
   ctx.save();
   ctx.globalAlpha = rat.opacity;
   ctx.translate(x, y);
+  ctx.scale(rat.dir >= 0 ? 1 : -1, 1);
 
   ctx.strokeStyle = '#a8845c';
   ctx.lineWidth = 2;
@@ -767,6 +1147,22 @@ function drawRat(rat, groundY) {
   ctx.fillRect(-9, bodyCenterY + 7 * bodyScaleY, 3, 5 * bodyScaleY);
   ctx.fillRect(4, bodyCenterY + 7 * bodyScaleY, 3, 5 * bodyScaleY);
 
+  // Goutte de sueur : au-delà de 70 °C, le rat souffre de la chaleur.
+  if (lie < 0.5 && getTempC() > 70) {
+    const dropX = headX - 6;
+    const dropY = headY - 13 * bodyScaleY + Math.sin(performance.now() / 300) * 2;
+    ctx.fillStyle = '#5fa8e8';
+    ctx.beginPath();
+    ctx.moveTo(dropX, dropY - 6);
+    ctx.quadraticCurveTo(dropX + 4, dropY + 1, dropX, dropY + 6);
+    ctx.quadraticCurveTo(dropX - 4, dropY + 1, dropX, dropY - 6);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.beginPath();
+    ctx.arc(dropX - 1.2, dropY - 1, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   ctx.restore();
 }
 
@@ -787,42 +1183,34 @@ function drawEffect(effect, now) {
 }
 
 function updateVieCounter() {
-  const el = document.getElementById('counter');
-  if (vieState.gasPhase === 'o2') {
-    el.textContent = `${vieState.totalParticles} molécules de dioxygène (O\u2082) : l'air est respirable, le rat est en pleine forme !`;
-  } else {
-    el.textContent = `Le dioxygène a disparu : l'air ne contient plus que du CO\u2082 et du N\u2082. Le rat ne peut plus respirer...`;
-  }
+  const counts = { O2: 0, CO2: 0, N2: 0 };
+  vieState.particles.forEach(p => { if (counts[p.gas.key] !== undefined) counts[p.gas.key]++; });
+  updateLegendCounts(counts);
+  document.getElementById('counter').textContent = '';
 }
 
-function drawVieStatusBanner(phase) {
-  let text = null, color = null;
-  if (phase === 'center_happy' || phase === 'exit_happy') {
-    text = 'O\u2082 suffisant';
-    color = '#16a34a';
-  } else if (phase === 'center_sad' || phase === 'dying' || phase === 'dissolving') {
-    text = 'O\u2082 absent';
-    color = '#dc2626';
-  }
+function drawVieStatusBanner(o2Percent) {
+  const text = o2Percent > VIE_O2_SLOW_THRESHOLD ? 'O\u2082 suffisant' : 'O\u2082 insuffisant';
+  const color = o2Percent > VIE_O2_SLOW_THRESHOLD ? '#16a34a' : '#dc2626';
   if (!text) return;
 
   ctx.save();
-  ctx.font = 'bold 18px Arial';
+  ctx.font = 'bold 28px Arial';
   ctx.textAlign = 'center';
   const textWidth = ctx.measureText(text).width;
-  const boxW = textWidth + 32, boxH = 32;
+  const boxW = textWidth + 40, boxH = 46;
   const boxX = canvas.width / 2 - boxW / 2, boxY = 14;
 
   ctx.fillStyle = 'rgba(255,255,255,0.88)';
-  roundRect(ctx, boxX, boxY, boxW, boxH, 8);
+  roundRect(ctx, boxX, boxY, boxW, boxH, 10);
   ctx.fill();
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
-  roundRect(ctx, boxX, boxY, boxW, boxH, 8);
+  roundRect(ctx, boxX, boxY, boxW, boxH, 10);
   ctx.stroke();
 
   ctx.fillStyle = color;
-  ctx.fillText(text, canvas.width / 2, boxY + boxH / 2 + 6);
+  ctx.fillText(text, canvas.width / 2, boxY + boxH / 2 + 9);
   ctx.restore();
 }
 
@@ -840,7 +1228,7 @@ function drawVie() {
   vieState.particles.forEach(p => drawMolecule(vieState, p));
   vieState.effects.forEach(e => drawEffect(e, performance.now()));
   drawRat(vieState.rat, groundY);
-  drawVieStatusBanner(VIE_PHASES[vieState.phaseIndex]);
+  drawVieStatusBanner(vieState.o2Percent);
   drawThermometer();
 }
 
@@ -1183,11 +1571,20 @@ function draw(planet) {
 function renderLegend(planet) {
   const el = document.getElementById('legend');
   el.innerHTML = '';
+  el.setAttribute('data-count', planet.gases.length);
   planet.gases.forEach(g => {
     const div = document.createElement('div');
     div.className = 'legend-item';
-    div.innerHTML = `<span class="dot" style="background:${g.color};"></span>${g.label}`;
+    const shortLabel = g.short || g.label;
+    div.innerHTML = `<div class="legend-item-top"><span class="dot" style="background:${g.color};"></span><span class="legend-label-full">${g.label}</span><span class="legend-label-short">${shortLabel}</span></div><span class="legend-count" id="count-${g.key}">0</span>`;
     el.appendChild(div);
+  });
+}
+
+function updateLegendCounts(counts) {
+  Object.keys(counts).forEach(key => {
+    const el = document.getElementById('count-' + key);
+    if (el) el.textContent = counts[key] + ' molécules';
   });
 }
 
@@ -1197,6 +1594,7 @@ function updateCounter() {
   const counts = {};
   planet.gases.forEach(g => counts[g.key] = 0);
   state.particles.forEach(p => counts[p.gas.key]++);
+  updateLegendCounts(counts);
 
   if (state.wallsBroken && state.particles.length === 0) {
     document.getElementById('counter').textContent =
@@ -1206,9 +1604,7 @@ function updateCounter() {
 
   const modelText = state.detailedModel ? ' (modèle détaillé)' : '';
   const brokenText = state.wallsBroken ? '  —  parois brisées, fuite en cours...' : '';
-  const parts = planet.gases.map(g => `${g.label} : ${counts[g.key]}`);
-  document.getElementById('counter').textContent =
-    parts.join('  |  ') + `  (total simulé : ${state.particles.length})${modelText}${brokenText}`;
+  document.getElementById('counter').textContent = `${modelText}${brokenText}`.trim();
 }
 
 function updatePressureLabel(planet) {
@@ -1218,15 +1614,254 @@ function updatePressureLabel(planet) {
     label.textContent = '💥 Parois brisées !';
     label.style.color = '#dc2626';
   } else if (state.pressure >= BREAK_THRESHOLD - 15) {
-    label.textContent = `Pression critique (${state.pressure})`;
+    label.textContent = `Critique (${state.pressure})`;
     label.style.color = '#ea580c';
   } else if (state.pressure >= 40) {
-    label.textContent = `Pression élevée (${state.pressure})`;
+    label.textContent = `Élevée (${state.pressure})`;
     label.style.color = '#b45309';
   } else {
-    label.textContent = `Pression normale (${state.pressure})`;
+    label.textContent = `Normale (${state.pressure})`;
     label.style.color = '#1b3a5c';
   }
+}
+
+// ================= Onglet Quizz : associer chaque diagramme en colonnes à sa planète =================
+// Les hauteurs des colonnes réutilisent directement les vraies proportions (planets[key].gases[i].prop),
+// donc si ces valeurs changent un jour, le quizz reste automatiquement cohérent avec la simulation.
+const QUIZ_PLANET_KEYS = ['earth', 'mars', 'mystery'];
+// Échelle commune aux 3 diagrammes : 100% de composition = cette hauteur de barre, en px.
+// Le graphique est plus petit sur mobile (.quiz-chart réduit), donc l'échelle doit l'être aussi,
+// sinon une barre proche de 100% (ex. le CO2 de Mars) dépasse en haut de sa carte.
+function getQuizMaxBarHeight() {
+  return window.innerWidth <= 640 ? 66 : 95;
+}
+const QUIZ_PHOTOS = {
+  earth: { url: 'https://commons.wikimedia.org/wiki/Special:FilePath/The_Blue_Marble_(remastered).jpg?width=300' },
+  mars: { url: 'https://commons.wikimedia.org/wiki/Special:FilePath/OSIRIS_Mars_true_color.jpg?width=300' },
+  mystery: { url: "https://commons.wikimedia.org/wiki/Special:FilePath/Artist's_impression_of_an_exoplanet_(ann12064c).jpg?width=300" }
+};
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuizChart(container, planetKey) {
+  container.innerHTML = '';
+  planets[planetKey].gases.forEach(g => {
+    const col = document.createElement('div');
+    col.className = 'quiz-bar-col';
+
+    const bar = document.createElement('div');
+    bar.className = 'quiz-bar';
+    bar.style.height = Math.max(4, g.prop * getQuizMaxBarHeight()) + 'px';
+    bar.style.background = g.key === 'CO2'
+      ? 'repeating-linear-gradient(45deg, #ef4444 0px, #ef4444 6px, #1f2937 6px, #1f2937 12px)'
+      : g.color;
+
+    const label = document.createElement('div');
+    label.className = 'quiz-bar-label';
+    label.innerHTML = '<span>' + (QUIZ_FORMULA[g.key] || g.key) + '</span>';
+
+    col.appendChild(bar);
+    col.appendChild(label);
+    container.appendChild(col);
+  });
+}
+
+const QUIZ_FORMULA = { N2: 'N\u2082', O2: 'O\u2082', CO2: 'CO\u2082', other: 'Autres' };
+// Mini icône "modèle détaillé" (boules-et-bâtons). Le CO2 garde ses couleurs chimiques rouge/noir
+// (oxygène/carbone), et sa barre reprend ces mêmes couleurs en rayures pour qu'on puisse relier
+// les deux sans ambiguïté.
+function miniMoleculeSVG(gas) {
+  if (gas.atoms === 1) {
+    return `<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6" fill="${gas.color}"/></svg>`;
+  }
+  if (gas.atoms === 2) {
+    return `<svg width="30" height="18" viewBox="0 0 30 18">
+      <line x1="7" y1="9" x2="23" y2="9" stroke="rgba(0,0,0,0.4)" stroke-width="2"/>
+      <circle cx="7" cy="9" r="6" fill="${gas.color}"/>
+      <circle cx="23" cy="9" r="6" fill="${gas.color}"/>
+    </svg>`;
+  }
+  return `<svg width="42" height="18" viewBox="0 0 42 18">
+    <line x1="7" y1="9" x2="35" y2="9" stroke="rgba(0,0,0,0.4)" stroke-width="2"/>
+    <circle cx="7" cy="9" r="5.5" fill="#ef4444"/>
+    <circle cx="21" cy="9" r="5.5" fill="#1f2937"/>
+    <circle cx="35" cy="9" r="5.5" fill="#ef4444"/>
+  </svg>`;
+}
+
+function dropZoneUnderPoint(x, y) {
+  const zones = document.querySelectorAll('.quiz-dropzone, .quiz-bank');
+  for (const z of zones) {
+    const r = z.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return z;
+  }
+  return null;
+}
+
+let quizDrag = null;
+function finishQuizDrag(img, x, y) {
+  img.classList.remove('dragging');
+  img.style.position = '';
+  img.style.left = '';
+  img.style.top = '';
+  img.style.width = '';
+  img.style.height = '';
+  document.querySelectorAll('.quiz-dropzone').forEach(z => z.classList.remove('hover'));
+
+  const target = dropZoneUnderPoint(x, y);
+  const bank = document.getElementById('quizBank');
+
+  if (target && target.classList.contains('quiz-dropzone')) {
+    const existing = target.querySelector('.quiz-photo');
+    if (existing && existing !== img) bank.appendChild(existing);
+    target.appendChild(img);
+  } else {
+    bank.appendChild(img);
+  }
+  document.querySelectorAll('.quiz-dropzone').forEach(z => {
+    z.classList.toggle('filled', !!z.querySelector('.quiz-photo'));
+  });
+  quizDrag = null;
+}
+
+function attachQuizDrag(img) {
+  img.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    const rect = img.getBoundingClientRect();
+    quizDrag = { el: img };
+    img.classList.add('dragging');
+    img.style.width = rect.width + 'px';
+    img.style.height = rect.height + 'px';
+    img.style.left = (rect.left) + 'px';
+    img.style.top = (rect.top) + 'px';
+    img.dataset.grabX = e.clientX - rect.left;
+    img.dataset.grabY = e.clientY - rect.top;
+    document.body.appendChild(img);
+    img.setPointerCapture(e.pointerId);
+  });
+  img.addEventListener('pointermove', (e) => {
+    if (!quizDrag || quizDrag.el !== img) return;
+    img.style.left = (e.clientX - parseFloat(img.dataset.grabX)) + 'px';
+    img.style.top = (e.clientY - parseFloat(img.dataset.grabY)) + 'px';
+    document.querySelectorAll('.quiz-dropzone').forEach(z => z.classList.remove('hover'));
+    const target = dropZoneUnderPoint(e.clientX, e.clientY);
+    if (target && target.classList.contains('quiz-dropzone')) target.classList.add('hover');
+  });
+  img.addEventListener('pointerup', (e) => {
+    if (!quizDrag || quizDrag.el !== img) return;
+    finishQuizDrag(img, e.clientX, e.clientY);
+  });
+  img.addEventListener('pointercancel', (e) => {
+    if (!quizDrag || quizDrag.el !== img) return;
+    finishQuizDrag(img, e.clientX, e.clientY);
+  });
+}
+
+function makeQuizPhotoEl(planetKey) {
+  const img = document.createElement('img');
+  img.className = 'quiz-photo';
+  img.src = QUIZ_PHOTOS[planetKey].url;
+  img.alt = 'Photo de planète à identifier';
+  img.draggable = false;
+  img.dataset.planet = planetKey;
+  attachQuizDrag(img);
+  return img;
+}
+
+function initQuiz() {
+  const columnsEl = document.getElementById('quizColumns');
+  const bankEl = document.getElementById('quizBank');
+  columnsEl.innerHTML = '';
+  bankEl.innerHTML = '';
+
+  shuffleArray(QUIZ_PLANET_KEYS).forEach(planetKey => {
+    const col = document.createElement('div');
+    col.className = 'quiz-col';
+    const chart = document.createElement('div');
+    chart.className = 'quiz-chart';
+    buildQuizChart(chart, planetKey);
+    const zone = document.createElement('div');
+    zone.className = 'quiz-dropzone';
+    zone.dataset.answer = planetKey;
+    col.appendChild(chart);
+    col.appendChild(zone);
+    columnsEl.appendChild(col);
+  });
+
+  shuffleArray(QUIZ_PLANET_KEYS).forEach(planetKey => {
+    bankEl.appendChild(makeQuizPhotoEl(planetKey));
+  });
+}
+
+// Le résultat ne s'affiche pas en bas : il clignote 5 fois, bien visible, au-dessus de l'animation.
+function flashQuizResult(text, correct) {
+  const zone = document.getElementById('quizFlashZone');
+  zone.textContent = text;
+  zone.classList.remove('blinking', 'flash-correct', 'flash-wrong');
+  void zone.offsetWidth;
+  zone.classList.add(correct ? 'flash-correct' : 'flash-wrong');
+  zone.style.display = 'block';
+  void zone.offsetWidth;
+  zone.classList.add('blinking');
+  setTimeout(() => {
+    zone.style.display = 'none';
+    zone.classList.remove('blinking');
+  }, 1350);
+}
+
+document.getElementById('quizCheckBtn').addEventListener('click', function () {
+  const zones = document.querySelectorAll('.quiz-dropzone');
+  let allFilled = true;
+  let allCorrect = true;
+  zones.forEach(zone => {
+    const photo = zone.querySelector('.quiz-photo');
+    if (!photo) { allFilled = false; return; }
+    if (photo.dataset.planet !== zone.dataset.answer) allCorrect = false;
+  });
+  if (!allFilled) {
+    flashQuizResult('Place les 3 photos avant de vérifier.', false);
+    return;
+  }
+  flashQuizResult(allCorrect ? '✅ Parfait !' : '❌ C\'est faux...', allCorrect);
+});
+document.getElementById('quizResetBtn').addEventListener('click', initQuiz);
+
+// ================= Onglet Questions à faire : le chien qui court puis nous fixe =================
+let finalTimers = [];
+function initFinalTab() {
+  finalTimers.forEach(t => clearTimeout(t));
+  finalTimers = [];
+
+  const dogRun = document.getElementById('finalDogRun');
+  const dogGlare = document.getElementById('finalDogGlare');
+  const track = document.getElementById('finalDogTrack');
+
+  dogGlare.style.display = 'none';
+  dogRun.style.display = 'inline-block';
+  dogRun.style.transition = 'none';
+  dogRun.style.left = '0px';
+
+  const runDuration = 1800;
+
+  requestAnimationFrame(() => {
+    const trackWidth = Math.max(40, track.getBoundingClientRect().width - 44);
+    requestAnimationFrame(() => {
+      dogRun.style.transition = `left ${runDuration}ms linear`;
+      dogRun.style.left = trackWidth + 'px';
+    });
+  });
+
+  finalTimers.push(setTimeout(() => {
+    dogRun.style.display = 'none';
+    dogGlare.style.display = 'inline-block';
+  }, runDuration + 100));
 }
 
 function switchTab(key) {
@@ -1235,20 +1870,52 @@ function switchTab(key) {
   document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab_' + key).classList.add('active');
 
+  document.getElementById('mysteryBanner').style.display = (key === 'mystery') ? 'block' : 'none';
+
   const isRappels = key === 'rappels';
-  canvas.style.display = isRappels ? 'none' : 'block';
+  const isQuiz = key === 'quiz';
+  const isFinal = key === 'final';
+  const isSpecial = isRappels || isQuiz || isFinal;
+  containerEl.classList.toggle('quiz-mode', isQuiz);
+  canvas.style.display = isSpecial ? 'none' : 'block';
   document.getElementById('rappelsContent').style.display = isRappels ? 'flex' : 'none';
-  document.getElementById('legend').style.display = isRappels ? 'none' : 'flex';
-  document.getElementById('controls').style.display = isRappels ? 'none' : 'flex';
-  document.getElementById('counter').style.display = isRappels ? 'none' : 'block';
+  document.getElementById('quizContent').style.display = isQuiz ? 'flex' : 'none';
+  document.getElementById('finalContent').style.display = isFinal ? 'flex' : 'none';
+  document.getElementById('legend').style.display = isSpecial ? 'none' : 'flex';
+  document.getElementById('tempRow').style.display = isSpecial ? 'none' : 'flex';
+  document.getElementById('buttonRow').style.display = isSpecial ? 'none' : 'flex';
+  document.getElementById('counter').style.display = isSpecial ? 'none' : 'block';
+  document.getElementById('vieRatRow').style.display = (key === 'vie') ? 'flex' : 'none';
 
   if (isRappels) {
     containerEl.style.background = '#f5f3ff';
     containerEl.style.borderColor = '#6d28d9';
     document.getElementById('title').textContent = 'Rappels de calculs';
-    document.getElementById('subtitle').textContent = "Comment calculer la proportion d'un gaz dans un mélange";
-    document.getElementById('modelControls').style.display = 'none';
-    document.getElementById('pressureBlock').style.display = 'none';
+    document.getElementById('subtitle').textContent = '';
+    document.getElementById('moleculeRow').style.display = 'none';
+    document.getElementById('pressureRow').style.display = 'none';
+    return;
+  }
+
+  if (isQuiz) {
+    containerEl.style.background = '#fef3e2';
+    containerEl.style.borderColor = '#7c2d12';
+    document.getElementById('title').textContent = 'Quizz : associe chaque atmosphère à sa planète';
+    document.getElementById('subtitle').textContent = '';
+    document.getElementById('moleculeRow').style.display = 'none';
+    document.getElementById('pressureRow').style.display = 'none';
+    initQuiz();
+    return;
+  }
+
+  if (isFinal) {
+    containerEl.style.background = '#eef6ff';
+    containerEl.style.borderColor = '#1b3a5c';
+    document.getElementById('title').textContent = 'Questions à faire';
+    document.getElementById('subtitle').textContent = '';
+    document.getElementById('moleculeRow').style.display = 'none';
+    document.getElementById('pressureRow').style.display = 'none';
+    initFinalTab();
     return;
   }
 
@@ -1258,15 +1925,17 @@ function switchTab(key) {
     document.getElementById('title').textContent = vieConfig.title;
     document.getElementById('subtitle').textContent = vieConfig.subtitle;
     renderLegend({ gases: [GAS_O2, GAS_CO2, GAS_N2] });
-    document.getElementById('modelControls').style.display = 'none';
-    document.getElementById('pressureBlock').style.display = 'none';
+    document.getElementById('moleculeRow').style.display = 'none';
+    document.getElementById('pressureRow').style.display = 'none';
+    document.getElementById('btnDetail').style.display = 'none';
     if (!vieState.initialized) initVie();
     updateVieCounter();
     return;
   }
 
-  document.getElementById('modelControls').style.display = 'flex';
-  document.getElementById('pressureBlock').style.display = 'flex';
+  document.getElementById('moleculeRow').style.display = 'flex';
+  document.getElementById('pressureRow').style.display = 'flex';
+  document.getElementById('btnDetail').style.display = 'inline-block';
 
   const planet = planets[key];
   containerEl.style.background = planet.bg;
@@ -1303,9 +1972,11 @@ Object.values(planets).forEach(planet => {
 
 document.getElementById('tab_earth').addEventListener('click', () => switchTab('earth'));
 document.getElementById('tab_mars').addEventListener('click', () => switchTab('mars'));
-document.getElementById('tab_venus').addEventListener('click', () => switchTab('venus'));
+document.getElementById('tab_mystery').addEventListener('click', () => switchTab('mystery'));
 document.getElementById('tab_vie').addEventListener('click', () => switchTab('vie'));
 document.getElementById('tab_rappels').addEventListener('click', () => switchTab('rappels'));
+document.getElementById('tab_quiz').addEventListener('click', () => switchTab('quiz'));
+document.getElementById('tab_final').addEventListener('click', () => switchTab('final'));
 
 document.getElementById('toggleBtn').addEventListener('click', function () {
   running = !running;
@@ -1313,11 +1984,16 @@ document.getElementById('toggleBtn').addEventListener('click', function () {
 });
 
 const tempLabel = document.getElementById('tempLabel');
-function updateTempDisplay(sliderValue) {
+function sliderToTempC(sliderValue) {
   const minSlider = 0.2, maxSlider = 3;
   const minTemp = -20, maxTemp = 120;
-  const temp = minTemp + (sliderValue - minSlider) * (maxTemp - minTemp) / (maxSlider - minSlider);
-  tempLabel.textContent = Math.round(temp) + ' °C';
+  return minTemp + (sliderValue - minSlider) * (maxTemp - minTemp) / (maxSlider - minSlider);
+}
+function getTempC() {
+  return sliderToTempC(speed);
+}
+function updateTempDisplay(sliderValue) {
+  tempLabel.textContent = Math.round(sliderToTempC(sliderValue)) + ' °C';
 }
 document.getElementById('speedRange').addEventListener('input', function () {
   const oldSpeed = speed;
@@ -1356,6 +2032,11 @@ document.getElementById('pressureRange').addEventListener('input', function () {
 });
 
 document.getElementById('resetBtn').addEventListener('click', function () {
+  if (currentKey === 'vie') {
+    initVie();
+    updateVieCounter();
+    return;
+  }
   const planet = planets[currentKey];
   createParticles(planet);
   resetPressureState(planet);
@@ -1363,10 +2044,19 @@ document.getElementById('resetBtn').addEventListener('click', function () {
   updateCounter();
 });
 
-switchTab('earth');
+const vieKillRange = document.getElementById('vieKillRange');
+const vieO2Label = document.getElementById('vieO2Label');
+vieKillRange.addEventListener('input', function () {
+  const kill = parseFloat(this.value);
+  const o2Percent = 100 - kill;
+  vieO2Label.textContent = Math.round(o2Percent) + '% O₂';
+  setVieO2Percent(o2Percent);
+});
+
+switchTab('final');
 
 function loop() {
-  if (running && currentKey !== 'rappels') {
+  if (running && currentKey !== 'rappels' && currentKey !== 'quiz' && currentKey !== 'final') {
     if (currentKey === 'vie') {
       updateVie(performance.now());
       drawVie();
